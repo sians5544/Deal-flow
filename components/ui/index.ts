@@ -1,3 +1,3 @@
-export * from "./NavigationMenu";
-export * from "./Button";
-export * from "./Input";
+export * from "./navigationMenu";
+export * from "./button";
+export * from "./input";
