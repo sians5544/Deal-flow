@@ -8,7 +8,7 @@ const DealCardGrid = async () => {
   const deals: Deal[] = await response.json();
 
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="grid grid-cols-4 gap-6">
       {deals.map((deal) => (
         <DealCard key={deal.id} deal={deal} />
       ))}

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Header } from "@/components/layout";
+import { Header, Category } from "@/components/layout";
 
 import "./globals.css";
 
@@ -18,6 +18,7 @@ export default function RootLayout({
     <html lang="ko">
       <body>
         <Header />
+        <Category />
         {children}
       </body>
     </html>
