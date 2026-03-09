@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Header, Category } from "@/components/layout";
+import { Header, Category, Container } from "@/components/layout";
 
 import "./globals.css";
 
@@ -19,7 +19,7 @@ export default function RootLayout({
       <body>
         <Header />
         <Category />
-        {children}
+        <Container>{children}</Container>
       </body>
     </html>
   );

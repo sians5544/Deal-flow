@@ -1,5 +1,7 @@
-const Container = () => {
-  return <div> 컨테이너 컴포넌트다</div>;
+const Container = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <div className="mx-auto max-w-[1440px] px-[120px] py-8">{children}</div>
+  );
 };
 
 export default Container;

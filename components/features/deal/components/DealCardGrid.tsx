@@ -1,5 +1,5 @@
 import { Deal } from "@/types";
-import { DealCard } from "@/components/features";
+import DealCard from "./DealCard";
 import { GET } from "@/app/api/deals/route";
 
 const DealCardGrid = async () => {
