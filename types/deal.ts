@@ -14,3 +14,8 @@ export interface Deal {
   reviewCount: number;
   freeShipping: boolean;
 }
+
+export type DealTimerProps = {
+  endTime: string; // ISO 8601 format
+  discountRate: number;
+};
