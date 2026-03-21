@@ -32,9 +32,11 @@ const DealTimer = ({
 
   return (
     <div
-      className={`flex items-center gap-1 w-[104]px h-[24]px p-2 bg-black/50 backdrop-blur-sm justify-center rounded-md ${className ?? ""}`}
+      className={`flex items-center gap-1 w-[104px] h-[24px] p-2 bg-black/50 backdrop-blur-sm justify-center rounded-md ${className ?? ""}`}
     >
-      <span className="text-sm font-medium text-white">{discountRate}%</span>
+      {discountRate !== undefined && (
+        <span className="text-sm font-medium text-white">{discountRate}%</span>
+      )}
       <span className="text-xs font-semibold text-white">{timeLeft}</span>
     </div>
   );

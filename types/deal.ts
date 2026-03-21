@@ -17,5 +17,19 @@ export interface Deal {
 
 export type DealTimerProps = {
   endTime: string; // ISO 8601 format
-  discountRate: number;
+  discountRate?: number;
 };
+
+export interface DealDetail extends Deal {
+  title: string;
+  images: string[]; // 메인 이미지 포함 전체 이미지 배열
+  qnaCount: number;
+  wishCount: number;
+  breadcrumb: string[]; // 예: ["홈", "패션", "신발", "스니커즈"]
+  colors: { name: string; hex: string }[];
+  sizes: { label: string; soldOut: boolean }[];
+  returnPolicy: string;
+  description: string; // 상품 상세 내용 (HTML or 텍스트)
+}
+
+export type DealInfosProps = Omit<DealDetail, "images">;
