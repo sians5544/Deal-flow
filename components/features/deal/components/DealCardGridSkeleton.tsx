@@ -1,13 +1,16 @@
 const DealCardGridSkeleton = () => {
   return (
-    <div className="grid grid-cols-2 gap-4">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="rounded-xl bg-muted animate-pulse">
-          <div className="aspect-video w-full rounded-t-xl bg-muted-foreground/20" />
+    <div className="grid grid-cols-4 gap-6">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <div key={i} className="rounded-xl bg-white border border-[#E5E7EB] animate-pulse">
+          <div className="aspect-square w-full rounded-t-xl bg-muted-foreground/10" />
           <div className="p-3 space-y-2">
-            <div className="h-3 w-1/2 rounded bg-muted-foreground/20" />
-            <div className="h-4 w-3/4 rounded bg-muted-foreground/20" />
-            <div className="h-5 w-1/3 rounded bg-muted-foreground/20" />
+            <div className="h-3 w-1/3 rounded bg-muted-foreground/10" />
+            <div className="h-4 w-3/4 rounded bg-muted-foreground/10" />
+            <div className="h-4 w-1/2 rounded bg-muted-foreground/10" />
+            <div className="h-3 w-1/4 rounded bg-muted-foreground/10" />
+            <div className="h-6 w-2/5 rounded bg-muted-foreground/10" />
+            <div className="h-3 w-1/2 rounded bg-muted-foreground/10" />
           </div>
         </div>
       ))}
