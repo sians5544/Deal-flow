@@ -27,14 +27,20 @@ const DealCard = ({ deal }: { deal: Deal }) => {
           <span className="text-xs text-muted-foreground">
             {deal.category} · {deal.brand}
           </span>
-          <CardTitle className="line-clamp-2 min-h-[3rem]">{deal.title}</CardTitle>
+          <CardTitle className="line-clamp-2 min-h-[3rem]">
+            {deal.title}
+          </CardTitle>
           <div className="flex-col">
             <div className="text-sm line-through text-muted-foreground">
               {deal.originalPrice.toLocaleString()}원
             </div>
             <div className="flex items-center gap-1">
-              <span className="text-lg font-bold text-red-600">{deal.discountRate}%</span>
-              <span className="text-lg font-bold">{deal.salePrice.toLocaleString()}원</span>
+              <span className="text-lg font-bold text-red-600">
+                {deal.discountRate}%
+              </span>
+              <span className="text-lg font-bold">
+                {deal.salePrice.toLocaleString()}원
+              </span>
             </div>
           </div>
         </CardHeader>

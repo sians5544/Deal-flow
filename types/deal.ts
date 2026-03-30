@@ -8,6 +8,7 @@ export interface Deal {
   originalPrice: number;
   salePrice: number;
   discountRate: number;
+  openTime: string; // ISO 8601 format
   endTime: string; // ISO 8601 format
   badge: "BEST" | "HOT" | "NEW" | null;
   rating: number;

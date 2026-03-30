@@ -24,6 +24,9 @@ const Header = () => {
             <NavigationMenuItem>
               <NavigationMenuLink href="/best">베스트</NavigationMenuLink>
             </NavigationMenuItem>
+            <NavigationMenuItem>
+              <NavigationMenuLink href="/today">오늘의 딜</NavigationMenuLink>
+            </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
 
