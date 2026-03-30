@@ -27,8 +27,8 @@ const CategoryTabs = () => {
   };
 
   return (
-    <nav>
-      <ul className="flex space-x-2 bg-[#111827] px-10 py-3 items-center">
+    <nav className="bg-[#111827]">
+      <ul className="flex space-x-2 px-[120px] py-3 items-center max-w-[1440px] mx-auto">
         {CATEGORIES.map((category) => {
           const isActive = active === category.id;
           return (

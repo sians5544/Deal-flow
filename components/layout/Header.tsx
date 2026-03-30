@@ -9,7 +9,7 @@ import {
 const Header = () => {
   return (
     <header className="border-b bg-white">
-      <div className="container mx-auto flex h-16 items-center px-10">
+      <div className="mx-auto max-w-[1440px] w-full flex h-16 items-center px-[120px]">
         <h1 className="mr-20">
           <Link href="/" className="text-xl font-bold">
             DealFlow
