@@ -4,6 +4,7 @@ import DealCard from "@/components/features/deal/components/DealCard";
 import { Deal } from "@/types";
 import DealCardGridSkeleton from "@/components/features/deal/components/DealCardGridSkeleton";
 import { Suspense } from "react";
+import { getDealsByTab } from "@/lib/deals";
 
 export const revalidate = 30;
 
@@ -16,16 +17,8 @@ const TodayPage = async ({ searchParams }: Props) => {
   const tab = tabParam ?? "open";
   const page = Number(pageParam ?? "1");
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/deals?tab=${tab}&page=${page}`,
-    { next: { revalidate: 30 } },
-  );
-  const { items, totalPages } = await response.json() as {
-    items: Deal[];
-    total: number;
-    page: number;
-    totalPages: number;
-  };
+  // 서버 컴포넌트에서는 API 라우트를 HTTP로 부르지 않고 데이터 함수를 직접 호출합니다.
+  const { items, totalPages } = getDealsByTab(tab, page);
 
   return (
     <>

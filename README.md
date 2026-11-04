@@ -2,18 +2,39 @@
 
 시간 한정 특가 딜을 모아 보여주는 Next.js 쇼핑 플랫폼입니다.
 
+> 개인 학습 프로젝트입니다. 실무에서는 Vue 3로 업무 화면을 개발해 왔고, React 19와 Next.js App Router의 렌더링 방식(Server Component, Suspense, ISR)을 커머스 화면에 직접 적용해 보기 위해 만들었습니다.
+
+- **배포:** _(Vercel 배포 후 링크 추가)_
+- **렌더링 정리 문서:** [docs/nextjs-rendering-guide.md](docs/nextjs-rendering-guide.md)
+
+## 화면
+
+_(배포 후 베스트 딜, 오늘의 딜, 상품 상세 화면 캡처 추가)_
+
+## 이 프로젝트에서 다룬 것
+
+| 주제 | 적용한 곳 |
+|---|---|
+| Server Component + Suspense | `/best` — 딜 목록을 서버에서 불러오고, 로딩 중에는 스켈레톤 표시 |
+| ISR (증분 정적 재생성) | `/today` — 30초마다 재검증해 딜 마감·오픈 상태 반영 |
+| URL 기반 상태 | `/today` — 탭(`오늘 오픈`/`오늘 마감`)과 페이지 번호를 쿼리 파라미터로 관리 |
+| Client Component + SWR | `/deals/[id]` — 상품 상세를 클라이언트에서 페칭 |
+| API Route | `/api/deals`, `/api/deals/[id]` — 목 데이터 기반 목록·상세 API |
+| 컴포넌트 구조 | `ui`(shadcn 기반) / `layout` / `features` 계층으로 분리 |
+
 ## 기술 스택
 
-- **Framework:** Next.js 15 (App Router)
+- **Framework:** Next.js 16 (App Router), React 19
 - **Language:** TypeScript
-- **Styling:** Tailwind CSS
-- **UI:** shadcn/ui
+- **Styling:** Tailwind CSS 4
+- **UI:** shadcn/ui (Radix UI)
 - **Data Fetching:** SWR (클라이언트), fetch + ISR (서버)
 
 ## 시작하기
 
 ```bash
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 [http://localhost:3000](http://localhost:3000) 에서 확인할 수 있습니다.

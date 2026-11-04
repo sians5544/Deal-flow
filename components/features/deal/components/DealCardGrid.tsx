@@ -1,15 +1,10 @@
 import { Deal } from "@/types";
 import DealCard from "./DealCard";
+import { getAllDeals } from "@/lib/deals";
 
 const DealCardGrid = async () => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/deals`,
-    {
-      cache: "force-cache", // 항상 최신 데이터를 가져오기 위해 캐시 사용 안 함
-    },
-  );
-
-  const deals: Deal[] = await response.json();
+  // 서버 컴포넌트에서는 API 라우트를 HTTP로 부르지 않고 데이터 함수를 직접 호출합니다.
+  const deals: Deal[] = getAllDeals();
 
   return (
     <div className="grid grid-cols-4 gap-6">
