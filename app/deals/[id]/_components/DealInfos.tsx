@@ -104,48 +104,54 @@ const DetailInfos = ({
         </div>
       </div>
 
-      {/* 색상 + 사이즈 */}
-      <div className="border-b pb-4 flex flex-col gap-3">
-        <div className="flex items-center gap-3">
-          <span className="w-12 text-sm text-[#6B7280]">색상</span>
-          <div className="flex gap-2">
-            {colors.map((color) => (
-              <button
-                key={color.name}
-                onClick={() => setSelectedColor(color.name)}
-                title={color.name}
-                className={`w-6 h-6 rounded-full border-2 transition-all ${
-                  selectedColor === color.name
-                    ? "border-[#111827] scale-110"
-                    : "border-transparent"
-                }`}
-                style={{ backgroundColor: color.hex }}
-              />
-            ))}
-          </div>
+      {/* 색상 + 사이즈 (식품처럼 옵션이 없는 상품은 숨김) */}
+      {(colors.length > 0 || sizes.length > 0) && (
+        <div className="border-b pb-4 flex flex-col gap-3">
+          {colors.length > 0 && (
+            <div className="flex items-center gap-3">
+              <span className="w-12 text-sm text-[#6B7280]">색상</span>
+              <div className="flex gap-2">
+                {colors.map((color) => (
+                  <button
+                    key={color.name}
+                    onClick={() => setSelectedColor(color.name)}
+                    title={color.name}
+                    className={`w-6 h-6 rounded-full border-2 transition-all ${
+                      selectedColor === color.name
+                        ? "border-[#111827] scale-110"
+                        : "border-transparent"
+                    }`}
+                    style={{ backgroundColor: color.hex }}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+          {sizes.length > 0 && (
+            <div className="flex items-center gap-3">
+              <span className="w-12 text-sm text-[#6B7280]">사이즈</span>
+              <div className="flex gap-2 flex-wrap">
+                {sizes.map((size) => (
+                  <button
+                    key={size.label}
+                    disabled={size.soldOut}
+                    onClick={() => !size.soldOut && setSelectedSize(size.label)}
+                    className={`px-3 py-1.5 text-sm rounded-md transition-all ${
+                      size.soldOut
+                        ? "bg-[#F3F4F6] text-[#D1D5DB] cursor-not-allowed"
+                        : selectedSize === size.label
+                          ? "bg-[#111827] text-white font-semibold"
+                          : "bg-[#F3F4F6] text-[#6B7280] hover:bg-[#E5E7EB]"
+                    }`}
+                  >
+                    {size.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-        <div className="flex items-center gap-3">
-          <span className="w-12 text-sm text-[#6B7280]">사이즈</span>
-          <div className="flex gap-2 flex-wrap">
-            {sizes.map((size) => (
-              <button
-                key={size.label}
-                disabled={size.soldOut}
-                onClick={() => !size.soldOut && setSelectedSize(size.label)}
-                className={`px-3 py-1.5 text-sm rounded-md transition-all ${
-                  size.soldOut
-                    ? "bg-[#F3F4F6] text-[#D1D5DB] cursor-not-allowed"
-                    : selectedSize === size.label
-                      ? "bg-[#111827] text-white font-semibold"
-                      : "bg-[#F3F4F6] text-[#6B7280] hover:bg-[#E5E7EB]"
-                }`}
-              >
-                {size.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
+      )}
 
       {/* 수량 */}
       <div className="border-b pb-4 flex items-center gap-3">
