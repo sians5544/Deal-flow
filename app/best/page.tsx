@@ -3,7 +3,13 @@ import { DealCardGrid, DealCardGridSkeleton } from "@/components/features";
 import { PageTitle } from "@/components/layout";
 import { Suspense } from "react";
 
-const BestDealsPage = async () => {
+type Props = {
+  searchParams: Promise<{ category?: string }>;
+};
+
+const BestDealsPage = async ({ searchParams }: Props) => {
+  const { category } = await searchParams;
+
   return (
     <div>
       <PageTitle
@@ -11,8 +17,9 @@ const BestDealsPage = async () => {
         description="지금 가장 인기있는 특가 상품을 만나보세요."
       />
 
-      <Suspense fallback={<DealCardGridSkeleton />}>
-        <DealCardGrid />
+      {/* 카테고리가 바뀌면 key가 바뀌어 스켈레톤부터 다시 보여줍니다. */}
+      <Suspense key={category ?? "all"} fallback={<DealCardGridSkeleton />}>
+        <DealCardGrid category={category} />
       </Suspense>
     </div>
   );

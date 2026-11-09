@@ -9,11 +9,12 @@ export const GET = (request: NextRequest) => {
   const { searchParams } = new URL(request.url);
   const tab = searchParams.get("tab");
   const page = Number(searchParams.get("page") ?? "1");
+  const category = searchParams.get("category");
 
   // tab 파라미터 없으면 기존처럼 전체 배열 반환 (best 페이지용)
   if (!tab) {
-    return Response.json(getAllDeals());
+    return Response.json(getAllDeals(category));
   }
 
-  return Response.json(getDealsByTab(tab, page));
+  return Response.json(getDealsByTab(tab, page, category));
 };
