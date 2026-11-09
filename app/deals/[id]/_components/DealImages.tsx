@@ -17,8 +17,8 @@ const DealImages = ({
   const [currentIndex, setCurrentIndex] = useState(0);
 
   return (
-    <div className="w-1/2 flex flex-col">
-      <div className="relative flex-1 min-h-0 mb-3">
+    <div className="flex w-full flex-col md:w-1/2">
+      <div className="relative mb-3 aspect-square md:aspect-auto md:min-h-0 md:flex-1">
         <Image
           fill
           src={images[currentIndex] || thumbnail}

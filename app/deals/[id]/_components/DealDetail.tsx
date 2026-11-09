@@ -48,7 +48,7 @@ const DealDetail = ({ dealId }: { dealId: string }) => {
   if (!data) return <div>Loading...</div>;
 
   return (
-    <div className="flex gap-6">
+    <div className="flex flex-col gap-6 md:flex-row">
       <DealImages thumbnail={data.thumbnail} images={data.images} />
       <DetailInfos {...data} />
     </div>

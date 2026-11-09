@@ -32,7 +32,7 @@ const CategoryTabs = () => {
 
   return (
     <nav className="bg-[#111827]">
-      <ul className="flex space-x-2 px-[120px] py-3 items-center max-w-[1440px] mx-auto">
+      <ul className="mx-auto flex max-w-[1440px] items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-4 py-3 md:px-8 lg:px-[120px]">
         {CATEGORIES.map((category) => {
           const isActive = active === category.id;
           return (
@@ -40,7 +40,7 @@ const CategoryTabs = () => {
               <button
                 onClick={() => handleSelect(category.id)}
                 aria-pressed={isActive}
-                className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
+                className={`shrink-0 whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
                   isActive
                     ? "bg-white text-[#111827]"
                     : "text-[#9CA3AF] hover:bg-white hover:text-[#111827]"

@@ -24,7 +24,7 @@ const DetailInfos = ({
   const [quantity, setQuantity] = useState(1);
 
   return (
-    <div className="flex flex-col gap-2 w-1/2">
+    <div className="flex w-full flex-col gap-2 md:w-1/2">
       {/* 타이틀 */}
       <div className="border-b pb-4 flex flex-col gap-1">
         <span className="text-xs text-muted-foreground">

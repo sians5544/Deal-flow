@@ -65,7 +65,7 @@ const TodayPage = async ({ searchParams }: Props) => {
           조건에 맞는 딜이 없어요.
         </p>
       ) : (
-        <div className="grid grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-6">
           {items.map((deal: Deal) => (
             <DealCard key={deal.id} deal={deal} />
           ))}

@@ -23,7 +23,7 @@ const DealCard = ({ deal }: { deal: Deal }) => {
             discountRate={deal.discountRate}
           />
         </div>
-        <CardHeader className="flex-col">
+        <CardHeader className="flex-col px-3 sm:px-6">
           <span className="text-xs text-muted-foreground">
             {deal.category} · {deal.brand}
           </span>
@@ -35,16 +35,16 @@ const DealCard = ({ deal }: { deal: Deal }) => {
               {deal.originalPrice.toLocaleString()}원
             </div>
             <div className="flex items-center gap-1">
-              <span className="text-lg font-bold text-red-600">
+              <span className="text-base font-bold text-red-600 sm:text-lg">
                 {deal.discountRate}%
               </span>
-              <span className="text-lg font-bold">
+              <span className="whitespace-nowrap text-base font-bold sm:text-lg">
                 {deal.salePrice.toLocaleString()}원
               </span>
             </div>
           </div>
         </CardHeader>
-        <CardHeader className="pt-0">
+        <CardHeader className="px-3 pt-0 sm:px-6">
           <span className="text-sm text-muted-foreground">
             {`⭐️ ${deal.rating} (${deal.reviewCount.toLocaleString()})`}
           </span>

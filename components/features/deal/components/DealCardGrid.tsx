@@ -15,7 +15,7 @@ const DealCardGrid = async ({ category }: { category?: string | null }) => {
   }
 
   return (
-    <div className="grid grid-cols-4 gap-6">
+    <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-6">
       {deals.map((deal) => (
         <DealCard key={deal.id} deal={deal} />
       ))}
