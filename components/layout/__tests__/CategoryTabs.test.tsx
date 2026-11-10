@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import CategoryTabs from "../CategoryTabs";
 
 // Next.js 라우터는 테스트 환경에 없으므로 현재 경로·쿼리와 push를 가짜로 정합니다.
@@ -22,40 +23,44 @@ describe("CategoryTabs", () => {
     push.mockClear();
   });
 
-  it("목록 페이지에서 탭을 누르면 같은 페이지에 카테고리를 붙인다", () => {
+  it("목록 페이지에서 탭을 누르면 같은 페이지에 카테고리를 붙인다", async () => {
+    const user = userEvent.setup();
     setLocation("/best");
     render(<CategoryTabs />);
 
-    fireEvent.click(screen.getByRole("button", { name: "식품" }));
+    await user.click(screen.getByRole("button", { name: "식품" }));
 
     expect(push).toHaveBeenCalledWith("/best?category=food");
   });
 
-  it("목록이 아닌 페이지(상세)에서 탭을 누르면 베스트로 이동한다", () => {
+  it("목록이 아닌 페이지(상세)에서 탭을 누르면 베스트로 이동한다", async () => {
+    const user = userEvent.setup();
     setLocation("/deals/1");
     render(<CategoryTabs />);
 
-    fireEvent.click(screen.getByRole("button", { name: "패션" }));
+    await user.click(screen.getByRole("button", { name: "패션" }));
 
     expect(push).toHaveBeenCalledWith("/best?category=fashion");
   });
 
-  it("오늘의 딜에서 카테고리를 바꾸면 탭은 유지하고 1페이지로 돌아간다", () => {
+  it("오늘의 딜에서 카테고리를 바꾸면 탭은 유지하고 1페이지로 돌아간다", async () => {
+    const user = userEvent.setup();
     setLocation("/today", "tab=closing&page=3");
     render(<CategoryTabs />);
 
-    fireEvent.click(screen.getByRole("button", { name: "가전" }));
+    await user.click(screen.getByRole("button", { name: "가전" }));
 
     expect(push).toHaveBeenCalledWith(
       "/today?tab=closing&page=1&category=tech",
     );
   });
 
-  it("'전체'를 누르면 카테고리 조건을 지운다", () => {
+  it("'전체'를 누르면 카테고리 조건을 지운다", async () => {
+    const user = userEvent.setup();
     setLocation("/best", "category=food");
     render(<CategoryTabs />);
 
-    fireEvent.click(screen.getByRole("button", { name: "전체" }));
+    await user.click(screen.getByRole("button", { name: "전체" }));
 
     expect(push).toHaveBeenCalledWith("/best");
   });

@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import DetailInfos from "../DealInfos";
 import { makeDealDetail } from "@/test-utils/factories";
 
@@ -9,18 +10,20 @@ const renderInfos = (overrides = {}) => {
 };
 
 describe("DealInfos", () => {
-  it("수량을 올리면 총 상품금액이 판매가 × 수량으로 바뀐다", () => {
+  it("수량을 올리면 총 상품금액이 판매가 × 수량으로 바뀐다", async () => {
+    const user = userEvent.setup();
     renderInfos({ salePrice: 70000 });
 
-    fireEvent.click(screen.getByRole("button", { name: "+" }));
+    await user.click(screen.getByRole("button", { name: "+" }));
 
     expect(screen.getByText("₩140,000")).toBeInTheDocument();
   });
 
-  it("수량은 1보다 작아지지 않는다", () => {
+  it("수량은 1보다 작아지지 않는다", async () => {
+    const user = userEvent.setup();
     renderInfos({ salePrice: 70000 });
 
-    fireEvent.click(screen.getByRole("button", { name: "−" }));
+    await user.click(screen.getByRole("button", { name: "−" }));
 
     expect(screen.getByText("1")).toBeInTheDocument();
     expect(screen.getAllByText("₩70,000").length).toBeGreaterThan(0);
