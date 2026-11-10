@@ -1,5 +1,9 @@
 import nextJest from "next/jest.js";
 
+// 배포 서버(Vercel)와 같은 UTC로 고정합니다. 개발자 PC 시간대(Asia/Seoul 등)에 따라 결과가 달라지지 않게 합니다.
+// 워커 프로세스가 만들어지기 전에 설정해야 하므로 설정 파일 맨 위에 둡니다.
+process.env.TZ = "UTC";
+
 // next.config와 .env를 읽어 Next.js 앱과 같은 방식(SWC)으로 TS/JSX를 변환합니다.
 const createJestConfig = nextJest({ dir: "./" });
 
