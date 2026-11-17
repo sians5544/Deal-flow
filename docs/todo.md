@@ -3,7 +3,6 @@
 위에서부터 하나씩 처리하고, 끝난 항목은 지웁니다. 무엇을 왜 바꿨는지는 `improvement-notes.md`, `testing-notes.md`에 남깁니다.
 
 ## 1. 버그 정리
-- [ ] 할인율 0이면 "0"이 찍힘 (`DealInfos.tsx`) — 직접 고쳐 보기. 고치면 `DealInfos.test.tsx`의 `it.failing`을 `it`으로
 - [ ] 카테고리를 데이터에 코드값(`food`)으로 저장하고 화면 표시만 라벨로 (`getCategoryValue` → `getCategoryLabel`)
 
 ## 2. 홈 화면 (`/`) — bkit PDCA 첫 적용

@@ -68,7 +68,7 @@ const DetailInfos = ({
         </div>
         <div className="flex items-center gap-3">
           <span className="w-12 text-sm text-muted-foreground">할인가</span>
-          {discountRate && (
+          {discountRate > 0 && (
             <span className="bg-[#EF4444] text-white text-xs font-bold px-2 py-0.5 rounded">
               {discountRate}%↓
             </span>

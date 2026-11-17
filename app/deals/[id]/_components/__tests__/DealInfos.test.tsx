@@ -48,9 +48,8 @@ describe("DealInfos", () => {
     expect(screen.getByRole("button", { name: "280" })).toBeDisabled();
   });
 
-  // 알려진 버그: discountRate && ... 라서 0%일 때 화면에 "0"이 찍힌다.
-  // 고치면 it.failing을 it으로 바꾼다.
-  it.failing("할인율이 0이면 할인 배지도 '0'도 보이지 않는다", () => {
+  // 예전 버그: discountRate && ... 라서 0%일 때 React가 숫자 0을 그대로 화면에 그렸다.
+  it("할인율이 0이면 할인 배지도 '0'도 보이지 않는다", () => {
     const { container } = renderInfos({ discountRate: 0 });
 
     expect(container.textContent).not.toMatch(/할인가0/);
