@@ -17,6 +17,8 @@ const config = {
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/$1",
   },
+  // .claude/ 아래에는 스킬 평가용 테스트 사본이 있어 실제 테스트로 돌리지 않습니다.
+  testPathIgnorePatterns: ["/node_modules/", "<rootDir>/.claude/"],
 };
 
 export default createJestConfig(config);
