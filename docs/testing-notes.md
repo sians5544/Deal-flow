@@ -88,12 +88,15 @@ Jest 단위 테스트를 도입하면서 무엇을 했고, 무엇을 찾았고, 
 PDCA는 bkit 플러그인으로 진행하고, 테스트는 **do와 analyze 사이**에 넣는다.
 
 ```
-/pdca plan → /pdca design → /pdca do → /jest-test → /pdca analyze → ...
+/pdca plan → /pdca design → /pdca do → /jest-test ─┬─ 버그 없음 → /pdca analyze → ...
+                                  ↑                 │
+                                  └── 버그 있음 ────┘  (do로 돌아가 수정)
 ```
 
 - **do 중**: 코드를 짜면서 그 파일의 테스트를 수시로 돌린다.
 - **do 끝**: 바꾼 파일에 `/jest-test`를 돌린다. 보고서는 `docs/03-analysis/<feature>.jest.md`에 남는다.
   - 결과(통과·실패, 찾은 버그)뿐 아니라 **어떻게 분석했는지**도 적는다: 규칙을 뽑은 근거, 우선순위 판단, 실패가 테스트 탓인지 구현 탓인지 가린 근거, coverage에서 본 것, 계획서 성공 조건과의 비교.
+- **버그가 나오면 do로 돌아간다**: `/jest-test`는 구현을 직접 고치지 않고 `it.failing`으로 기록한다. 이 목록이 다시 do에서 할 일이 된다. 고친 뒤 `it.failing`을 `it`으로 바꾸고 `/jest-test`를 다시 돌린다. 버그가 없을 때 analyze로 넘어간다.
 - **analyze**: bkit의 설계 대비 구현 비교와 Jest 보고서를 함께 보고 다음 단계(iterate/report)를 정한다.
 - 진행 상태 폴더 `.bkit/`는 git에 올리지 않는다.
 
