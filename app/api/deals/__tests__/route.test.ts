@@ -40,7 +40,7 @@ describe("GET /api/deals", () => {
     );
     expect(
       body.items.every(
-        (deal: { category: string }) => deal.category === "가전",
+        (deal: { category: string }) => deal.category === "tech",
       ),
     ).toBe(true);
   });

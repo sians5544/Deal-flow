@@ -1,9 +1,12 @@
 // types/deal.ts
+// 카테고리 코드. 화면 표시 이름은 lib/categories.ts의 getCategoryLabel로 바꿉니다.
+export type CategoryId = "fashion" | "tech" | "beauty" | "food" | "living";
+
 export interface Deal {
   id: number;
   thumbnail: string;
   title: string;
-  category: string;
+  category: CategoryId;
   brand: string;
   originalPrice: number;
   salePrice: number;

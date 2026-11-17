@@ -6,7 +6,7 @@ export const makeDeal = (overrides: Partial<Deal> = {}): Deal => ({
   id: 1,
   thumbnail: "https://images.unsplash.com/photo-test?w=400",
   title: "테스트 상품",
-  category: "패션",
+  category: "fashion",
   brand: "테스트 브랜드",
   originalPrice: 100000,
   salePrice: 70000,

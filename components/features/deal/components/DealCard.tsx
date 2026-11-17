@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { Deal } from "@/types/deal";
+import { getCategoryLabel } from "@/lib/categories";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import DealTimer from "./DealTimer";
 import Link from "next/link";
@@ -25,7 +26,7 @@ const DealCard = ({ deal }: { deal: Deal }) => {
         </div>
         <CardHeader className="flex-col px-3 sm:px-6">
           <span className="text-xs text-muted-foreground">
-            {deal.category} · {deal.brand}
+            {getCategoryLabel(deal.category)} · {deal.brand}
           </span>
           <CardTitle className="line-clamp-2 min-h-[3rem]">
             {deal.title}

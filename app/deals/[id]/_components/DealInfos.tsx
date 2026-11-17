@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { DealInfosProps } from "@/types/deal";
+import { getCategoryLabel } from "@/lib/categories";
 import DealTimer from "@/components/features/deal/components/DealTimer";
 
 const DetailInfos = ({
@@ -28,7 +29,7 @@ const DetailInfos = ({
       {/* 타이틀 */}
       <div className="border-b pb-4 flex flex-col gap-1">
         <span className="text-xs text-muted-foreground">
-          {category} · {brand}
+          {getCategoryLabel(category)} · {brand}
         </span>
         <h1 className="text-xl font-bold text-[#111827]">{title}</h1>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">

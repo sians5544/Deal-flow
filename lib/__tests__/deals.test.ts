@@ -93,7 +93,7 @@ describe("getAllDeals", () => {
     const deals = getAllDeals("food");
 
     expect(deals).toHaveLength(2);
-    expect(deals.every((deal) => deal.category === "식품")).toBe(true);
+    expect(deals.every((deal) => deal.category === "food")).toBe(true);
   });
 
   it('"all"이나 모르는 카테고리면 거르지 않는다', () => {
@@ -107,7 +107,7 @@ describe("getDealsByTab", () => {
     const result = getDealsByTab("open", 1, "tech");
 
     expect(result.items).toHaveLength(4);
-    expect(result.items.every((deal) => deal.category === "가전")).toBe(true);
+    expect(result.items.every((deal) => deal.category === "tech")).toBe(true);
     expect(result.total).toBe(4);
     expect(result.totalPages).toBe(1);
   });

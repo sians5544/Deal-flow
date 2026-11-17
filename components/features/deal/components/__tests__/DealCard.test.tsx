@@ -18,6 +18,13 @@ describe("DealCard", () => {
     expect(screen.getByText("99,000원")).toBeInTheDocument();
   });
 
+  it("카테고리는 코드가 아니라 화면 이름으로 보여준다", () => {
+    render(<DealCard deal={makeDeal({ category: "beauty", brand: "설화수" })} />);
+
+    expect(screen.getByText("뷰티/건강 · 설화수")).toBeInTheDocument();
+    expect(screen.queryByText(/beauty/)).not.toBeInTheDocument();
+  });
+
   it("무료배송이 아니면 '배송비 포함'을 보여준다", () => {
     render(<DealCard deal={makeDeal({ freeShipping: false })} />);
 
