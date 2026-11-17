@@ -42,3 +42,6 @@ next-env.d.ts
 
 # design drafts (local only)
 design/
+
+# bkit PDCA state (local only)
+.bkit/
