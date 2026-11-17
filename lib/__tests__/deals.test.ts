@@ -37,10 +37,9 @@ describe("딜 시간 계산", () => {
     jest.useRealTimers();
   });
 
-  // 구현 버그: `today`를 모듈이 처음 불러와질 때 한 번만 계산한다.
-  // 서버가 계속 떠 있으면 자정이 지나도 어제 날짜의 딜을 돌려준다.
-  // (한국·UTC 날짜가 같은 정오 시각을 써서 시간대 버그와 섞이지 않게 했다)
-  it.failing("날짜가 바뀌면 새 날짜의 딜을 돌려준다", async () => {
+  // 예전 버그: `today`를 모듈이 처음 불러와질 때 한 번만 계산해, 서버가 자정을 넘기면 어제 딜을 돌려줬다.
+  // (한국·UTC 날짜가 같은 정오 시각을 써서 시간대 문제와 섞이지 않게 했다)
+  it("날짜가 바뀌면 새 날짜의 딜을 돌려준다", async () => {
     const deals = await loadDealsAt("2026-11-10T12:00:00+09:00");
 
     jest.setSystemTime(new Date("2026-11-11T12:00:00+09:00"));
@@ -54,9 +53,8 @@ describe("딜 시간 계산", () => {
     }
   });
 
-  // 구현 버그: `todayAt`이 서버의 현지 시간대로 시각을 만든다.
-  // Vercel(UTC)에서는 "09:00 오픈"이 한국 시간 18:00이 된다.
-  it.failing(
+  // 예전 버그: `todayAt`이 서버의 현지 시간대로 시각을 만들어, Vercel(UTC)에서 "09:00 오픈"이 한국 18:00이 됐다.
+  it(
     "서버가 UTC여도 오픈·마감 시간은 한국 시간 기준이다",
     async () => {
       const deals = await loadDealsAt("2026-11-10T12:00:00+09:00");
@@ -72,6 +70,18 @@ describe("딜 시간 계산", () => {
       );
     },
   );
+
+  it("한국 시간 새벽(UTC로는 전날)에도 한국 날짜 기준으로 오늘 딜을 돌려준다", async () => {
+    // 한국 11-11 08:00 = UTC 11-10 23:00
+    const deals = await loadDealsAt("2026-11-11T08:00:00+09:00");
+
+    const { items } = deals.getDealsByTab("open");
+
+    expect(items.length).toBeGreaterThan(0);
+    for (const deal of items) {
+      expect(deal.openTime.startsWith("2026-11-11")).toBe(true);
+    }
+  });
 });
 
 describe("getAllDeals", () => {
