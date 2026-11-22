@@ -9,6 +9,7 @@
 1. [ISR (Incremental Static Regeneration)](#1-isr-incremental-static-regeneration)
 2. [Server Component vs Client Component](#2-server-component-vs-client-component)
 3. [Hydration 과정](#3-hydration-과정)
+3-1. [클라이언트 컴포넌트 안에 서버 컴포넌트 넣기 (children vs import)](#3-1-클라이언트-컴포넌트-안에-서버-컴포넌트-넣기-children-vs-import)
 4. [Streaming과 Suspense](#4-streaming과-suspense)
 5. [React Fiber의 우선순위 시스템](#5-react-fiber의-우선순위-시스템)
 6. [DealFlow 프로젝트 전체 동작 흐름](#6-dealflow-프로젝트-전체-동작-흐름)
@@ -170,19 +171,11 @@ export function DealCard({ deal }: { deal: Deal }) {
   <button>장바구니 담기</button> <!-- 클릭 안 됨 -->
 </div>
 
-<!-- RSC Payload (데이터 포함) -->
-<script id="__NEXT_DATA__">
-{
-  "props": {
-    "deal": {
-      "id": 1,
-      "title": "에어 조던 1",
-      "endTime": "2024-12-31T23:59:59Z"
-    }
-  }
-}
-</script>
+<!-- RSC Payload (App Router) : 모양만 간략히 -->
+<script>self.__next_f.push([1, "1:I[\"chunks/carousel.js\",\"Carousel\"]\n2:[\"$\",\"$L1\",null,{\"children\":[...]}]"])</script>
 ```
+
+> **정정 (2026-11-22)**: 처음에는 여기에 `<script id="__NEXT_DATA__">`를 적었는데, 그건 **Pages Router** 방식이다. App Router는 `self.__next_f.push(...)`로 RSC Payload를 조각조각 넣는다. 안에는 서버 컴포넌트가 그린 결과와 **클라이언트 컴포넌트 참조**("이 자리는 `Carousel`, 코드는 이 JS 파일, props는 이것")가 들어 있다. 11번가 홈을 확인할 때 `__NEXT_DATA__`도 `__next_f`도 없어서 Next.js가 아니라고 판단한 근거가 이것이다.
 
 ### Hydration 전후 비교
 
@@ -211,6 +204,91 @@ useEffect(() => setIsHydrated(true), []);
 // 2. 빠른 Hydration (0.1-0.3초)
 // 3. 사용자가 느끼지 못하게 최적화
 ```
+
+---
+
+## 3-1. 클라이언트 컴포넌트 안에 서버 컴포넌트 넣기 (children vs import)
+
+> 홈 배너·오늘 마감 캐러셀을 설계하면서 정리 (2026-11-22). 적용 예: `docs/01-plan/features/home.plan.md` 2.3
+
+### 핵심 한 줄
+
+**`"use client"` 파일이 import한 컴포넌트는 클라이언트가 되고, children(props)으로 받은 컴포넌트는 서버에서 그려진 결과라 서버로 남는다.**
+
+비유: 캐러셀은 **액자**, 카드는 **그림**이다. 그림은 서버에서 다 그려 보내고, 브라우저에는 액자를 움직이는 장치(넘김 JS)만 보낸다. Vue의 슬롯과 같은 구조인데, 부모가 서버에 있어서 슬롯 내용이 이미 그려진 상태로 도착한다는 점만 다르다.
+
+### 좋은 예: children으로 넘김
+
+```tsx
+// app/page.tsx  ← 서버 컴포넌트
+export default async function Home() {
+  const { closing } = getHomeSections(new Date());   // ① 데이터: 서버
+  return (
+    <Carousel>                                       {/* ③ 클라이언트: 넘김만 */}
+      <CarouselContent>
+        {closing.map((deal) => (
+          <CarouselItem key={deal.id}>
+            <DealCard deal={deal} />                 {/* ② 카드: 서버에서 그림 */}
+          </CarouselItem>
+        ))}
+      </CarouselContent>
+    </Carousel>
+  );
+}
+```
+
+`components/ui/carousel.tsx`는 이미 `"use client"`라서 서버 컴포넌트에서 바로 쓸 수 있다. `carousel.tsx` 안에는 `import DealCard`가 없다. 카드는 그냥 `children` prop이다.
+
+### 나쁜 예: 안에서 import + 브라우저에서 fetch
+
+```tsx
+"use client";
+import DealCard from "./DealCard";                    // import → DealCard도 클라이언트
+export default function DealCarousel() {
+  const [deals, setDeals] = useState([]);
+  useEffect(() => { fetch("/api/deals?tab=closing").then(r => r.json()).then(setDeals); }, []);
+  return <Carousel>{deals.map(d => <DealCard key={d.id} deal={d} />)}</Carousel>;
+}
+```
+
+| | children으로 넘김 | 안에서 import + fetch |
+|---|---|---|
+| 데이터를 부르는 곳 | 서버 | 브라우저 (JS 실행 뒤) |
+| 첫 HTML에 카드가 있나 | 있음 | 없음 (스켈레톤 → 나중에 채움) |
+| 브라우저가 받는 JS | 캐러셀 동작 코드 | 캐러셀 + `DealCard` + 그 아래 import 전부 |
+| 결과 | 서버 렌더링 | 그 부분만 CSR (11번가 방식) |
+
+**같은 화면이라도 import하느냐 children으로 받느냐에 따라 CSR이 될 수도, 서버 렌더링이 될 수도 있다.**
+
+### 클라이언트 컴포넌트도 첫 HTML은 서버가 그린다
+
+`"use client"`의 뜻은 "브라우저에서만 실행"이 아니라 **"브라우저에도 코드를 보내 거기서 다시 살린다(hydration)"**이다. 서버가 첫 HTML을 그릴 때 `useEffect`는 돌지 않으므로, 상태는 **초깃값**(빈 배열, 로딩 중)으로 그려진다.
+
+### 브라우저에서 데이터를 부르면: 그 부분만 나중에 채워진다
+
+| 단계 | 일어나는 일 | 화면 |
+|------|------------|------|
+| ① HTML 도착 | 서버가 초깃값으로 그린 HTML + 클라이언트 컴포넌트 참조 | 틀과 스켈레톤 |
+| ② JS 도착 → hydration | 있는 HTML에 이벤트·상태를 **붙임** (다시 그리지 않음) | 그대로, 이제 클릭 가능 |
+| ③ `useEffect` → fetch | 브라우저가 API 호출 | 그대로 |
+| ④ 데이터 도착 → `setState` | **바뀐 부분만** 다시 그림 | 카드가 채워짐 |
+
+- hydration은 **갈아끼우기가 아니라 붙이기**다. 서버 HTML과 브라우저 첫 렌더가 다르면 hydration 불일치 경고가 난다 (그래서 "지금 시각"은 서버에서 한 번만 정한다).
+- 같은 클라이언트 컴포넌트 안에서도 **누가 만들었나**로 갈린다. 서버가 만들어 props·children으로 넘긴 것은 서버 렌더링, 브라우저에서 받은 데이터로 직접 만든 것은 CSR.
+- 서버에서 첫 데이터를 넘기고 브라우저에서 갱신만 하는 섞은 방식도 있다 (SWR `fallbackData`).
+
+### 언제 브라우저에서 데이터를 부르나
+
+| 브라우저에서 | 서버에서 |
+|---|---|
+| 찜 여부, 장바구니 (사용자마다 다르고 자주 바뀜) | 오늘 마감, 곧 오픈, 베스트 (모두에게 같음) |
+| "더 보기"로 다음 페이지 이어 붙이기 | 첫 화면 목록 |
+| 실시간 재고, 최근 본 상품 (브라우저 저장소) | 상품명, 가격, 사진 |
+
+### DealFlow에서
+
+- 홈: 캐러셀 두 개 모두 ①에서 카드가 이미 들어 있고, ②에서 넘김 동작만 연결된다. ③·④가 없다.
+- 상세(`DealDetail.tsx`): 지금 `"use client"` 안에서 fetch하므로 본문이 CSR이다. → `docs/todo.md` 3번에서 서버 컴포넌트로 전환.
 
 ---
 
