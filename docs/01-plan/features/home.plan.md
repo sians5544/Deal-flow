@@ -193,6 +193,25 @@ app/page.tsx                 서버 (async)  now를 정하고 영역별 딜을 �
 - [ ] `pnpm test`, `pnpm exec tsc --noEmit`, `pnpm lint` 통과
 - [ ] `pnpm build` 성공
 
+### 4.3 성능 측정 (선택)
+
+| 항목 | 값 |
+|------|-----|
+| **선택 여부** | 선택 안 함 (CSR 비교와 대량 데이터 측정은 Supabase 단계에서 직접 진행하기로 함) |
+
+선택하면 아래 순서로 analyze에 포함한다.
+
+1. **do 전**: 배포본에서 바꾸기 전 값을 기록 (`/today`, `/best`. 홈은 지금 임시 화면이라 바꾸기 전 값이 의미 없음)
+2. **analyze**: 같은 조건으로 다시 재서 `docs/03-analysis/home.perf.md`에 비교
+3. 목표에 못 미치면 Act(iterate)로 돌아감
+
+| 지표 | 측정 방법 | 목표 (모바일) |
+|------|-----------|---------------|
+| LCP | chrome-devtools 성능 trace, 3회 중앙값 | 2.5초 이하 |
+| TBT | 같음 | 200ms 이하 |
+| CLS | 같음 | 0.1 이하 |
+| 브라우저가 받은 JS | 네트워크 요청 중 script 크기 합계 | 바꾸기 전보다 감소 (`DealTimer` 제거 효과) |
+
 ---
 
 ## 5. Risks and Mitigation
