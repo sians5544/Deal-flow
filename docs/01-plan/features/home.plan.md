@@ -118,26 +118,7 @@ v0.3에서 맨 위 큰 딜 1개를 11번가 홈처럼 **배너 캐러셀**로 �
 
 ### 2.3 서버 / 클라이언트 경계
 
-기준: **브라우저에서만 할 수 있는 일(상태, 클릭·드래그, 타이머, 브라우저 API)이 있는 부분만 클라이언트 컴포넌트**로 만든다.
-
-```
-app/page.tsx                 서버 (async)  now를 정하고 영역별 딜을 고름
-├─ HeroCarousel             [클라이언트]  자동 넘김 타이머, 일시정지 상태, 동작 줄이기 확인
-│   └─ HeroSlide × 최대 3    서버에서 그려 children으로 넘김
-├─ 오늘 마감 섹션            서버          제목, 전체보기 링크
-│   └─ Carousel(shadcn)     [클라이언트]  화살표, 손으로 밀기
-│       └─ DealCard × 6      서버에서 그려 children으로 넘김
-├─ 곧 오픈 섹션              서버
-├─ 베스트 섹션               서버
-└─ 빈 상태 안내              서버
-```
-
-| 원칙 | 이유 |
-|------|------|
-| 캐러셀은 children을 받는 껍데기로 만든다 | `"use client"` 파일이 **import**한 컴포넌트는 함께 클라이언트가 되지만, **children으로 받은** 컴포넌트는 서버에서 그려진 결과라 서버로 남는다. 브라우저가 받는 JS가 넘김 동작뿐이 된다 |
-| "지금 시각"은 `page.tsx`에서 한 번만 정한다 | 클라이언트에서 `new Date()`로 마감 표시를 계산하면 서버가 그린 시각과 달라 hydration 불일치가 난다. 서버 시간대(UTC)도 한국과 다르다 |
-| `DealCard`에서 `DealTimer`(1초 타이머)를 뺀다 | 카드마다 1초에 한 번 다시 그리는 일이 없어지고, 카드가 JS 없는 서버 컴포넌트가 된다 (`/today`, `/best`도 같이 가벼워짐) |
-| 배너 첫 장 사진만 `priority` | 첫 화면에서 가장 큰 요소(LCP)라서 미리 받는다. 나머지 장은 지연 로딩 |
+결정: 홈은 서버 컴포넌트로 그리고, 클라이언트 컴포넌트는 캐러셀 두 개(배너, 오늘 마감)만 둔다. 컴포넌트 트리와 이유는 설계서 [home.design.md 2.1, 5.3](../../02-design/features/home.design.md), 개념은 [렌더링 가이드 3-1](../../nextjs-rendering-guide.md).
 
 ### 2.4 Out of Scope
 - 개인화 추천, 광고·기획전 배너 (배너에는 딜만 넣는다)
@@ -285,15 +266,9 @@ app/page.tsx                 서버 (async)  now를 정하고 영역별 딜을 �
 | Testing | Jest / Playwright | Jest(섹션 함수), Playwright는 todo 5번 | async 서버 컴포넌트는 Jest로 그리지 않는다 |
 | Backend | 목 데이터 | 목 데이터 | 범위 밖 |
 
-### 7.3 Folder Structure Preview
+### 7.3 Folder Structure
 
-```
-app/page.tsx                                  ← 홈 (async 서버 컴포넌트)
-components/features/home/components/          ← HeroCarousel("use client"), HeroSlide, 오픈 예정, 베스트 순위 (Design에서 확정)
-lib/home.ts                                   ← 영역 선택 함수, now를 인자로
-lib/dealTime.ts (또는 lib/home.ts 안)          ← "오늘 HH:MM 마감 / 곧 마감" 문구 규칙
-lib/__tests__/home.test.ts
-```
+설계서 [home.design.md 11.1](../../02-design/features/home.design.md)에서 확정.
 
 ---
 
@@ -336,3 +311,4 @@ lib/__tests__/home.test.ts
 | 0.1 | 2026-11-18 | 첫 작성 (섹션·기준·개수·끝난 딜 처리 확정) | Park sian |
 | 0.2 | 2026-11-22 | 오늘 마감 영역을 `Carousel`로, 곧 오픈·베스트를 좌우 배치에서 위아래 전체 폭으로. 목업 3안 비교 후 A안(큰 딜 + 오늘 마감 + 곧 오픈 + 베스트 순위)으로 변경. 카운트다운 대신 시각 표시, 영역 간 중복 제거, 사진 정리 추가 | Park sian |
 | 0.3 | 2026-11-22 | 11번가 홈을 참고해 맨 위 큰 딜 1개를 배너 캐러셀(최대 3장, 자동 넘김, 일시정지, 동작 줄이기 대응)로 변경. FR-11 추가, 서버/클라이언트 경계(2.3) 추가, 성능 비교는 Supabase 단계로 미룸 | Park sian |
+| 0.3.1 | 2026-11-22 | 구현 방식(서버/클라이언트 트리, 폴더 구조)을 설계서로 옮기고 결정 한 줄과 링크만 남김 | Park sian |
