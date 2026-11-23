@@ -118,6 +118,18 @@ describe("getDealsByTab", () => {
     expect(result.totalPages).toBe(1);
   });
 
+  it("now를 넘기면 그 한국 날짜에 열리는 딜로 거른다", () => {
+    const dayStart = new Date("2026-11-10T00:00:00+09:00").getTime();
+    const { items } = getDealsByTab("open", 1, null, 12, new Date("2026-11-10T12:00:00+09:00"));
+
+    expect(items.length).toBeGreaterThan(0);
+    for (const deal of items) {
+      const open = new Date(deal.openTime).getTime();
+      expect(open).toBeGreaterThanOrEqual(dayStart);
+      expect(open).toBeLessThan(dayStart + 24 * 60 * 60 * 1000);
+    }
+  });
+
   it('"end" 탭이면 오늘 마감되는 딜을 돌려준다', () => {
     // 지금 목 데이터는 오픈·마감이 모두 같은 날이라 "open" 탭과 결과가 같다.
     // 두 탭의 차이는 데이터를 밖에서 넣을 수 있게 바꾼 뒤 검증한다.

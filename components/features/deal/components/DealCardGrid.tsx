@@ -12,7 +12,7 @@ const DealCardGrid = async ({ category }: { category?: string | null }) => {
   if (deals.length === 0) {
     return (
       <p className="py-24 text-center text-sm text-muted-foreground">
-        이 카테고리에는 지금 진행 중인 딜이 없어요.
+        이 카테고리에는 아직 딜이 없어요.
       </p>
     );
   }

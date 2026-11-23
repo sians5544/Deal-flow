@@ -7,7 +7,6 @@ import { DAY_MS, kstDayStart } from "@/lib/deals";
 
 const HOUR_MS = 60 * 60 * 1000;
 
-// TODO(module-2): 이미지는 설계서 11.2-6번에서 기획전에 맞는 가로 사진으로 다시 고릅니다. 지금은 임시 주소입니다.
 export const buildBanners = (now: Date): Banner[] => {
   const today = kstDayStart(now);
   const at = (ms: number) => new Date(ms).toISOString();

@@ -448,8 +448,9 @@ export const getDealsByTab = (
   page = 1,
   categoryId?: string | null,
   limit = 12,
+  // Design Ref: §1.2 — 페이지가 정한 now를 받아, 목록 거르기와 카드 마감 문구가 같은 순간을 기준으로 삼게 합니다.
+  now: Date = new Date(),
 ): DealsPage => {
-  const now = new Date();
   const todayStart = kstDayStart(now);
   const todayEnd = todayStart + DAY_MS;
 

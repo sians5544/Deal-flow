@@ -18,7 +18,8 @@ const TodayPage = async ({ searchParams }: Props) => {
   const now = new Date();
 
   // 서버 컴포넌트에서는 API 라우트를 HTTP로 부르지 않고 데이터 함수를 직접 호출합니다.
-  const { items, totalPages } = getDealsByTab(tab, page, category);
+  // 목록을 거르는 기준도 카드 문구와 같은 now입니다 (limit은 기본값 그대로).
+  const { items, totalPages } = getDealsByTab(tab, page, category, undefined, now);
 
   // 탭·페이지를 옮겨도 선택한 카테고리가 유지되도록 링크를 만듭니다.
   const hrefFor = (nextTab: string, nextPage: number) => {
