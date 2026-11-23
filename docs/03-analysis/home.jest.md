@@ -119,11 +119,13 @@
 
 ## 다음 단계 판정 (module-2)
 
-**`it.failing` 1개 → do로 돌아가 고칠 것. analyze로 넘어가지 않는다.**
+**`it.failing` 없음 → analyze 진행 가능.**
 
-| 파일 | 원인 | 고칠 방향 |
+첫 실행에서 찾은 `it.failing` 1개는 do로 돌아가 고치고 `it`으로 바꿨다.
+
+| 파일 | 원인 | 고친 방법 |
 |------|------|-----------|
-| `DealCard.tsx` 할인율 표시 | 조건 없이 `{deal.discountRate}%`를 그려, 할인율 0이면 빨간 "0%"가 나온다. 상세 화면 `DealInfos.tsx:72`는 11-17에 `discountRate > 0 &&`로 이미 고쳤다 | 카드도 `discountRate > 0`일 때만 할인율과 원래 가격 줄을 보여준다 |
+| `DealCard.tsx` 할인율 표시 | 조건 없이 `{deal.discountRate}%`를 그려, 할인율 0이면 빨간 "0%"가 나온다. 상세 화면 `DealInfos.tsx:72`는 11-17에 `discountRate > 0 &&`로 이미 고쳤다 | `hasDiscount = discountRate > 0`일 때만 할인율과 원래 가격 취소선을 그린다. 취소선 줄은 `min-h-5` 빈 칸으로 남겨 카드 높이를 맞춘다 |
 
 ## 분류
 
@@ -134,7 +136,7 @@
 ## 테스트한 규칙 (`__tests__/DealCard.test.tsx`)
 - 기존: 누르면 해당 상품 상세로 이동하는 링크다 / 가격을 천 단위 쉼표와 함께 보여준다 / 카테고리는 코드가 아니라 화면 이름으로 보여준다 / 무료배송이 아니면 '배송비 포함'을 보여준다
 - 마감 문구: 마감 30분 전이면 '곧 마감 · HH:MM'을 보여준다 / 마감 5시간 전이면 '오늘 HH:MM 마감'을 보여주고 카운트다운은 없다 / 마감이 지났으면 '마감'을 보여준다 / 마감 시각이 잘못된 값이면 '마감 시간 미정'을 보여준다
-- ❌ `it.failing`: 할인율이 0이면 '0%'를 보여주지 않는다
+- 할인율: ✅(고침) 할인율이 0이면 '0%'를 보여주지 않는다 / 할인율이 0이면 원래 가격 취소선 없이 판매가만 한 번 보여준다
 
 ## 분석 과정
 
@@ -165,8 +167,9 @@
 - `/today`, `/best`가 `now`를 넘기는지: async 서버 컴포넌트라 Jest로 그리지 않는다. 빠뜨리면 `tsc`가 잡는다 (`now`가 필수 prop). 화면 흐름은 E2E(`docs/todo.md` 6번).
 
 ## 실행 결과 (module-2)
-- `pnpm test -- DealCard.test`: 9개 중 8 통과 + `it.failing` 1개(기대대로 실패)
-- 전체 `pnpm test`: 105 통과
+- 첫 실행: 9개 중 8 통과 + `it.failing` 1개(기대대로 실패)
+- 고친 뒤 `pnpm test -- DealCard.test`: 10 통과, `it.failing` 없음
+- 전체 `pnpm test`: 106 통과
 - `pnpm exec tsc --noEmit`, `pnpm lint`: 통과
 
 ## 계획서와 비교 (module-2)

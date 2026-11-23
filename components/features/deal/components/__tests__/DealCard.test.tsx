@@ -42,10 +42,9 @@ describe("DealCard", () => {
     expect(screen.getByText("배송비 포함")).toBeInTheDocument();
   });
 
-  // 할인율 0을 숨기는 기준은 상세 화면(DealInfos)이 이미 정해 두었습니다 (11-17에 고친 버그).
-  // 목록 카드는 그 조건 없이 항상 `${discountRate}%`를 그려 "0%"가 빨간 글씨로 나옵니다.
-  // 고칠 방향: DealCard에서도 discountRate > 0일 때만 할인율(과 원래 가격 줄)을 보여준다.
-  it.failing("할인율이 0이면 '0%'를 보여주지 않는다", () => {
+  // 할인율 0을 숨기는 기준은 상세 화면(DealInfos)과 같습니다.
+  // ✅(고침 11-23) 처음엔 조건 없이 `${discountRate}%`를 그려 "0%"가 빨간 글씨로 나왔습니다.
+  it("할인율이 0이면 '0%'를 보여주지 않는다", () => {
     render(
       <DealCard
         deal={makeDeal({ discountRate: 0, originalPrice: 50000, salePrice: 50000 })}
@@ -54,6 +53,17 @@ describe("DealCard", () => {
     );
 
     expect(screen.queryByText("0%")).not.toBeInTheDocument();
+  });
+
+  it("할인율이 0이면 원래 가격 취소선 없이 판매가만 한 번 보여준다", () => {
+    render(
+      <DealCard
+        deal={makeDeal({ discountRate: 0, originalPrice: 50000, salePrice: 50000 })}
+        now={now}
+      />,
+    );
+
+    expect(screen.getAllByText("50,000원")).toHaveLength(1);
   });
 
   // Design Ref: §8.4 7~9 — 카운트다운 대신 마감 시각 문구. 시각은 한국 시간(+09:00)으로 적습니다.

@@ -11,6 +11,7 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 // Plan SC: FR-06 마감 표시 통일, FR-09 흑백 처리 제거
 const DealCard = ({ deal, now }: { deal: Deal; now: Date }) => {
   const endLabel = formatEndLabel(deal.endTime, now);
+  const hasDiscount = deal.discountRate > 0;
 
   return (
     <Link href={`/deals/${deal.id}`} className="block">
@@ -32,13 +33,17 @@ const DealCard = ({ deal, now }: { deal: Deal; now: Date }) => {
             {deal.title}
           </CardTitle>
           <div className="flex-col">
-            <div className="text-sm line-through text-muted-foreground">
-              {deal.originalPrice.toLocaleString()}원
+            {/* 할인이 없으면 "0%"와 같은 값의 취소선 가격을 그리지 않습니다 (상세 DealInfos와 같은 기준).
+                취소선 줄은 빈 칸으로 남겨 카드 높이를 다른 카드와 맞춥니다. */}
+            <div className="min-h-5 text-sm line-through text-muted-foreground">
+              {hasDiscount && `${deal.originalPrice.toLocaleString()}원`}
             </div>
             <div className="flex items-center gap-1">
-              <span className="text-base font-bold text-red-600 sm:text-lg">
-                {deal.discountRate}%
-              </span>
+              {hasDiscount && (
+                <span className="text-base font-bold text-red-600 sm:text-lg">
+                  {deal.discountRate}%
+                </span>
+              )}
               <span className="whitespace-nowrap text-base font-bold sm:text-lg">
                 {deal.salePrice.toLocaleString()}원
               </span>
