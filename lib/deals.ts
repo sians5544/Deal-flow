@@ -5,11 +5,12 @@ import { Deal, DealDetail } from "@/types/deal";
 import { isCategoryId } from "@/lib/categories";
 
 // 딜 시간은 한국 시간 기준입니다. 서버(Vercel)는 UTC라서 서버 현지 시간을 쓰면 9시간 밀립니다.
-const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
-const DAY_MS = 24 * 60 * 60 * 1000;
+export const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
+export const DAY_MS = 24 * 60 * 60 * 1000;
 
 // now가 속한 한국 날짜의 0시를 UTC 시각(ms)으로 돌려줍니다.
-const kstDayStart = (now: Date) => {
+// Design Ref: §3.4 — 한국 날짜 계산은 여기 한 곳만 두고 dealTime·banners·home이 같이 씁니다 (11-17 시간대 버그 재발 방지).
+export const kstDayStart = (now: Date) => {
   const kst = new Date(now.getTime() + KST_OFFSET_MS);
   return (
     Date.UTC(kst.getUTCFullYear(), kst.getUTCMonth(), kst.getUTCDate()) -
@@ -427,8 +428,22 @@ const filterByCategory = (list: Deal[], categoryId?: string | null) =>
     ? list.filter((deal) => deal.category === categoryId)
     : list;
 
-export const getAllDeals = (categoryId?: string | null): Deal[] =>
-  filterByCategory(buildDeals(new Date()), categoryId);
+// now를 넘기면 그 시각 기준의 목 데이터를 돌려줍니다. 순서는 바꾸지 않습니다 (GET /api/deals 응답 순서 유지).
+export const getAllDeals = (
+  categoryId?: string | null,
+  now: Date = new Date(),
+): Deal[] => filterByCategory(buildDeals(now), categoryId);
+
+// 리뷰 수가 많은 순. 같으면 id 순으로 고정합니다. 끝난 딜도 포함합니다 (/best는 "마감"으로 보여줌).
+// Design Ref: §4 — getAllDeals를 정렬하면 API 응답 순서까지 바뀌므로 베스트 정렬은 따로 둡니다.
+// Plan SC: FR-10 /best도 홈 베스트와 같은 기준
+export const byReviewCountDesc = (a: Deal, b: Deal) =>
+  b.reviewCount - a.reviewCount || a.id - b.id;
+
+export const getBestDeals = (
+  categoryId?: string | null,
+  now: Date = new Date(),
+): Deal[] => [...getAllDeals(categoryId, now)].sort(byReviewCountDesc);
 
 export const getDealsByTab = (
   tab: string,

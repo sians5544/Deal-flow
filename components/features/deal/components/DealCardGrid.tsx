@@ -1,10 +1,11 @@
 import { Deal } from "@/types";
 import DealCard from "./DealCard";
-import { getAllDeals } from "@/lib/deals";
+import { getBestDeals } from "@/lib/deals";
 
 const DealCardGrid = async ({ category }: { category?: string | null }) => {
   // 서버 컴포넌트에서는 API 라우트를 HTTP로 부르지 않고 데이터 함수를 직접 호출합니다.
-  const deals: Deal[] = getAllDeals(category);
+  // /best는 리뷰 수가 많은 순입니다 (홈 베스트와 같은 기준).
+  const deals: Deal[] = getBestDeals(category);
 
   if (deals.length === 0) {
     return (
