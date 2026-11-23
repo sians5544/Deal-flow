@@ -49,7 +49,10 @@ export const selectHomeSections = (
     .slice(0, HOME_LIMITS.banners);
 
   // Plan SC: FR-05 끝난 딜은 어느 영역에도 들어가지 않습니다. 모든 영역이 live에서 출발합니다.
-  const live = deals.filter((d) => time(d.endTime) > nowMs);
+  // 오픈 시각이 잘못된(NaN) 딜은 언제 열리는지 모르므로 여기서 뺍니다. 빼지 않으면 베스트에만 남습니다.
+  const live = deals.filter(
+    (d) => !Number.isNaN(time(d.openTime)) && time(d.endTime) > nowMs,
+  );
 
   // Plan SC: FR-02 진행 중인 딜을 마감 빠른 순으로 최대 6개
   const closing = live

@@ -178,10 +178,8 @@ describe("selectHomeSections", () => {
       expect(sections.bestPages).toEqual([]);
     });
 
-    // 찾은 버그: 오픈 시각만 잘못되면 오늘 마감·곧 오픈에서는 빠지지만, 베스트는 live(마감 전) 전체에서 고르므로 남는다.
-    //   언제 열리는지 모르는 딜이 순위에 오른다.
-    // 고칠 방향: live를 만들 때 openTime·endTime이 모두 올바른 딜만 남긴다.
-    it.failing("오픈 시각이 잘못된 딜은 베스트에도 없다", () => {
+    // 11-23 고친 버그: 오픈 시각만 잘못되면 오늘 마감·곧 오픈에서는 빠졌지만, 베스트는 live(마감 전) 전체에서 골라 남았다.
+    it("오픈 시각이 잘못된 딜은 베스트에도 없다", () => {
       const deal = makeDeal({ id: 1, openTime: "not-a-date", endTime: iso("20:00") });
 
       const { bestPages } = selectHomeSections([deal], [], kst("14:00"));

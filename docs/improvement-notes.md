@@ -69,6 +69,26 @@
 - 타입을 `string`에서 `CategoryId`로 좁혀서, 오타가 난 카테고리는 TypeScript가 바로 잡아 준다.
 - Supabase로 옮길 때 `category` 칸에 이 코드를 그대로 넣으면 된다.
 
+## 5. 잘못된 시각 값이 화면 문구와 베스트에 새지 않게 함
+
+**문제**
+- 홈 규칙 함수를 `/jest-test`로 검사하면서 "이상한 입력" 경우를 넣어 보니, 날짜가 아닌 시각 문자열에서 세 군데가 틀렸다.
+  - `formatEndLabel`이 `"NaN월 NaN일 NaN:NaN 마감"`을, `formatKstTime`이 `"NaN:NaN"`을 돌려줬다.
+  - 오픈 시각만 잘못된 딜이 오늘 마감·곧 오픈에서는 빠지는데 베스트에는 남았다.
+
+**원인**
+- `new Date("abc")`는 오류를 던지지 않고 Invalid Date를 만든다. 그 값의 `getTime()`은 `NaN`이고, NaN과의 비교(`<`, `<=`, `>`)는 항상 false다.
+- 그래서 `formatEndLabel`은 앞의 조건을 모두 지나쳐 마지막 "M월 D일" 분기로 빠졌다.
+- `selectHomeSections`의 `live`는 `endTime > now`만 봤다. 오픈 시각이 NaN이면 오늘 마감(`openTime <= now`)과 곧 오픈(`now < openTime`) 둘 다 false라 우연히 빠졌지만, 베스트는 `live` 전체에서 고르므로 남았다.
+
+**해결**
+- `lib/dealTime.ts`: 시각이 Invalid Date면 먼저 돌려준다 (`"마감 시간 미정"`, `"--:--"`).
+- `lib/home.ts`: `live`를 만들 때 오픈 시각이 올바른 딜만 남긴다. 마감 시각이 NaN인 딜은 원래 `endTime > now`에서 빠진다.
+
+**이렇게 한 이유**
+- 지금은 목 데이터라 이런 값이 없다. 처음에는 관리자 입력 검사 단계까지 미루려 했지만, 데이터가 어디서 오든 화면 함수는 스스로 방어해야 한다고 판단했다. 곧 Supabase·관리자 입력으로 데이터가 바뀐다.
+- NaN은 조용히 퍼진다. 비교가 전부 false가 되므로 "어느 조건에도 안 걸리는" 값이 되고, 영역마다 결과가 달라진다. 경계에서 한 번 거르면 아래 규칙은 올바른 값만 다룬다.
+
 ## 다음에 고칠 것
 - 상세 페이지를 서버 컴포넌트로 전환하고 `loading.tsx`, `not-found.tsx`, `generateMetadata` 추가
 - 마감 시간 계산 버그: `today`를 파일이 처음 불러와질 때 한 번만 계산하고, 서버(UTC)와 한국 시간 차이를 고려하지 않음

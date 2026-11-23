@@ -14,13 +14,20 @@ const toKst = (iso: string) => new Date(new Date(iso).getTime() + KST_OFFSET_MS)
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
-// "2026-11-23T09:00:00.000Z" → "18:00"
+// 날짜가 아닌 문자열이면 Invalid Date가 되고, 계산이 모두 NaN이 되어 "NaN:NaN"이 화면에 나옵니다.
+// 데이터가 API·관리자 입력으로 바뀌어도 화면 문구는 스스로 방어합니다.
+const isInvalidTime = (iso: string) => Number.isNaN(new Date(iso).getTime());
+
+// "2026-11-23T09:00:00.000Z" → "18:00". 잘못된 값이면 "--:--"
 export const formatKstTime = (iso: string): string => {
+  if (isInvalidTime(iso)) return "--:--";
   const kst = toKst(iso);
   return `${pad(kst.getUTCHours())}:${pad(kst.getUTCMinutes())}`;
 };
 
 export const formatEndLabel = (endTime: string, now: Date): EndLabel => {
+  if (isInvalidTime(endTime)) return { text: "마감 시간 미정", urgent: false };
+
   const end = new Date(endTime).getTime();
   const remaining = end - now.getTime();
   const time = formatKstTime(endTime);

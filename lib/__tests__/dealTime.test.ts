@@ -68,9 +68,8 @@ describe("formatEndLabel", () => {
     );
   });
 
-  // 찾은 버그: 날짜가 아닌 문자열이면 계산이 모두 NaN이 되어 "NaN월 NaN일 NaN:NaN 마감"이 화면에 나온다.
-  // 고칠 방향: Invalid Date를 먼저 확인하고 대체 문구를 돌려준다.
-  it.failing("시각 값이 잘못되면 '마감 시간 미정'을 돌려준다", () => {
+  // 11-23 고친 버그: 날짜가 아닌 문자열이면 계산이 모두 NaN이 되어 "NaN월 NaN일 NaN:NaN 마감"이 화면에 나왔다.
+  it("시각 값이 잘못되면 '마감 시간 미정'을 돌려준다", () => {
     expect(formatEndLabel("not-a-date", NOW)).toEqual({
       text: "마감 시간 미정",
       urgent: false,
@@ -87,8 +86,8 @@ describe("formatKstTime", () => {
     expect(formatKstTime("2026-11-23T00:05:00+09:00")).toBe("00:05");
   });
 
-  // 찾은 버그: 잘못된 문자열이면 "NaN:NaN"이 나온다 (곧 오픈 시각 표시에도 쓰인다).
-  it.failing("시각 값이 잘못되면 '--:--'를 돌려준다", () => {
+  // 11-23 고친 버그: 잘못된 문자열이면 "NaN:NaN"이 나왔다 (곧 오픈 시각 표시에도 쓰인다).
+  it("시각 값이 잘못되면 '--:--'를 돌려준다", () => {
     expect(formatKstTime("not-a-date")).toBe("--:--");
   });
 });
