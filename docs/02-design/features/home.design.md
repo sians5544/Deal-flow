@@ -418,8 +418,8 @@ app/home-mockup/                                      삭제 (커밋 안 된 목
 2. [x] `types/banner.ts`, `lib/banners.ts`
 3. [x] `chunk`, `lib/home.ts` (`getAllDeals(categoryId?, now?)` 확장 포함)
 4. [x] `getBestDeals` + `DealCardGrid` 정렬 (FR-10)
-5. [ ] `DealCard` 마감 문구·흑백 제거·덮개 제거, `/today`·`/best`에 `now` 전달 (FR-06, FR-09 일부)
-6. [ ] 상품과 안 맞는 썸네일 교체 (FR-09), 배너 이미지 고르기
+5. [x] `DealCard` 마감 문구·흑백 제거·덮개 제거, `/today`·`/best`에 `now` 전달 (FR-06, FR-09 일부)
+6. [x] 상품과 안 맞는 썸네일 교체 (FR-09), 배너 이미지 고르기
 7. [ ] 서버 섹션 컴포넌트 (`SectionHeader`, `EmptyNotice`, `BannerSlide`, `UpcomingPage`, `BestPage`)
 8. [ ] `useAutoplay`, `PagedCarousel` (FR-01, FR-03, FR-04, FR-11)
 9. [ ] `app/page.tsx` 조립, `force-dynamic` (FR-01~05, 07, 08)

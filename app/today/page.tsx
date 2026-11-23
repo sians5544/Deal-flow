@@ -14,6 +14,8 @@ const TodayPage = async ({ searchParams }: Props) => {
   const { tab: tabParam, page: pageParam, category } = await searchParams;
   const tab = tabParam ?? "open";
   const page = Number(pageParam ?? "1");
+  // 카드의 마감 문구("오늘 HH:MM 마감")가 기준으로 삼을 지금 시각. 페이지에서 한 번만 정합니다.
+  const now = new Date();
 
   // 서버 컴포넌트에서는 API 라우트를 HTTP로 부르지 않고 데이터 함수를 직접 호출합니다.
   const { items, totalPages } = getDealsByTab(tab, page, category);
@@ -67,7 +69,7 @@ const TodayPage = async ({ searchParams }: Props) => {
       ) : (
         <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-6">
           {items.map((deal: Deal) => (
-            <DealCard key={deal.id} deal={deal} />
+            <DealCard key={deal.id} deal={deal} now={now} />
           ))}
         </div>
       )}
