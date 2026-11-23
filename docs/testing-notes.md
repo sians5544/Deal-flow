@@ -94,21 +94,25 @@ Jest 단위 테스트를 도입하면서 무엇을 했고, 무엇을 찾았고, 
 **배운 점**
 - 첫 시도는 서브에이전트로 했는데, 서브에이전트는 부모 세션이 시작할 때 읽은 CLAUDE.md를 그대로 받아서 정답을 알고 시작했다. 블라인드 평가는 파일을 가린 뒤 **새 세션**에서 해야 한다.
 
-## 5. 앞으로의 진행 방식
+## 5. PDCA 안에서 테스트하는 흐름 (홈에서 실제로 해 본 방식)
 
-PDCA는 bkit 플러그인으로 진행하고, 테스트는 **do와 analyze 사이**에 넣는다.
+PDCA는 bkit 플러그인으로 진행하고, 테스트는 **do와 analyze 사이**에 넣는다. 홈(`/`)을 이 흐름으로 처음 끝까지 진행했다 (2026-11-18 ~ 11-23).
 
 ```
-/pdca plan → /pdca design → /pdca do → /jest-test ─┬─ 버그 없음 → /pdca analyze → ...
-                                  ↑                 │
-                                  └── 버그 있음 ────┘  (do로 돌아가 수정)
+plan → design(설계서 11.3에 module 나누기)
+  → do --scope module-1 → /jest-test ─┬─ it.failing 있음 → 같은 module에서 고치고 /jest-test 다시
+  → do --scope module-2 → /jest-test  │
+  → ...                               └─ 없음 → 다음 module
+  → 마지막 module: 목업 삭제 + tsc·lint·test·build
+  → analyze (gap-detector 정적 비교 + 운영 빌드를 띄워 화면 확인) → 고칠 것 선택 → report
 ```
 
-- **do 중**: 코드를 짜면서 그 파일의 테스트를 수시로 돌린다.
-- **do 끝**: 바꾼 파일에 `/jest-test`를 돌린다. 보고서는 `docs/03-analysis/<feature>.jest.md`에 남는다.
-  - 결과(통과·실패, 찾은 버그)뿐 아니라 **어떻게 분석했는지**도 적는다: 규칙을 뽑은 근거, 우선순위 판단, 실패가 테스트 탓인지 구현 탓인지 가린 근거, coverage에서 본 것, 계획서 성공 조건과의 비교.
-- **버그가 나오면 do로 돌아간다**: `/jest-test`는 구현을 직접 고치지 않고 `it.failing`으로 기록한다. 이 목록이 다시 do에서 할 일이 된다. 고친 뒤 `it.failing`을 `it`으로 바꾸고 `/jest-test`를 다시 돌린다. 버그가 없을 때 analyze로 넘어간다.
-- **analyze**: bkit의 설계 대비 구현 비교와 Jest 보고서를 함께 보고 다음 단계(iterate/report)를 정한다.
+- **module마다 새 세션**: `/clear` 후 `/pdca do <feature> --scope module-N`. 설계서를 처음부터 다시 읽고 시작하므로 앞 세션의 기억에 기대지 않는다.
+- **module이 끝날 때마다 `/jest-test`**: 처음 계획은 do 전체가 끝난 뒤 한 번이었지만, module마다 돌리니 버그를 그 module 안에서 바로 고칠 수 있었다. 보고서 `docs/03-analysis/<feature>.jest.md`에 module별 절로 쌓는다.
+  - 결과뿐 아니라 **어떻게 분석했는지**도 적는다: 규칙을 뽑은 근거, 우선순위 판단, 실패가 테스트 탓인지 구현 탓인지 가린 근거, coverage에서 본 것, 계획서 성공 조건과의 비교.
+- **버그가 나오면 do로 돌아간다**: `/jest-test`는 구현을 직접 고치지 않고 `it.failing`으로 기록한다. 고친 뒤 `it`으로 바꾸고 다시 돌린다. 홈에서는 4개가 나왔다 (NaN 마감 문구, `NaN:NaN`, 잘못된 오픈 시각 딜이 베스트에 남음, 카드의 할인율 0%).
+- **애매한 동작은 `it.todo`로 미루지 않는다**: "데이터가 어디서 오든 화면 함수는 스스로 방어해야 한다"는 기준으로, 사용자가 겪을 문제가 분명하면 `it.failing`으로 잡는다.
+- **analyze**: gap-detector의 설계 대비 구현 비교에 더해, `pnpm build && pnpm start`로 띄운 화면을 응답 코드·HTML 문구·브라우저(데스크톱·390px)로 확인한다. Playwright가 아직 없어서, 확인한 시각에 볼 수 없는 화면(밤에 확인하면 낮 화면)은 Jest 결과로 대신했다. E2E가 생기면 시각을 고정해서 확인한다.
 - 진행 상태 폴더 `.bkit/`는 git에 올리지 않는다.
 
 ## 면접에서 설명할 한 줄

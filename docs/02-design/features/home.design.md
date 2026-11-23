@@ -3,11 +3,11 @@
 > **요약**: 홈(`/`)을 요청마다 서버에서 그린다. 영역 선택 규칙은 `lib/home.ts`, 마감 문구는 `lib/dealTime.ts`, 기획전 배너 데이터는 `lib/banners.ts`로 분리한다. 클라이언트는 캐러셀뿐이다: 배너·곧 오픈·베스트가 함께 쓰는 `PagedCarousel`과 오늘 마감의 shadcn `Carousel`.
 >
 > **Project**: deal-flow
-> **Version**: 0.3.0
+> **Version**: 0.5.0
 > **Author**: Park sian
 > **Date**: 2026-11-22
 > **Status**: Draft
-> **Planning Doc**: [home.plan.md](../../01-plan/features/home.plan.md) (v0.5)
+> **Planning Doc**: [home.plan.md](../../01-plan/features/home.plan.md) (v0.6)
 > **개념 정리**: [nextjs-rendering-guide.md 3-1](../../nextjs-rendering-guide.md) (children vs import, hydration)
 
 ---
@@ -111,7 +111,7 @@ app/page.tsx                       서버  dynamic = "force-dynamic"
 | Component | Depends On | Purpose |
 |-----------|-----------|---------|
 | `app/page.tsx` | `lib/home.ts`, 섹션 컴포넌트 | 조립 |
-| `lib/home.ts` | `lib/deals.ts`, `lib/banners.ts`, `lib/dealTime.ts` | 영역 선택 |
+| `lib/home.ts` | `lib/deals.ts`, `lib/banners.ts` | 영역 선택 (마감 문구는 화면 쪽에서 `lib/dealTime.ts`를 직접 씀) |
 | `lib/banners.ts` | `lib/deals.ts`의 `kstDayStart` | 오늘 기준 노출 기간 만들기 |
 | `DealCard`, `UpcomingPage`, `BestPage` | `lib/dealTime.ts` | 마감·오픈 시각 문구 |
 | `PagedCarousel` | `components/ui/carousel.tsx`, `useAutoplay` | 넘김·장 표시·자동 재생 |
@@ -178,7 +178,7 @@ export type EndLabel = { text: string; urgent: boolean };
 | 영역 | 조건 | 정렬 | 개수 |
 |------|------|------|------|
 | **banners** | `startAt <= now < endAt` | `order` 오름차순, 같으면 `id` | 5 |
-| live (내부) | 딜 `endTime > now` | - | - |
+| live (내부) | 딜 `endTime > now`이고 `openTime`이 올바른 시각 (잘못된 시각인 딜은 어디에도 넣지 않음) | - | - |
 | active (내부) | live 중 `openTime <= now` | `endTime` 오름차순, 같으면 `id` | - |
 | **closing** | active 앞에서부터 | 위와 같음 | 6 |
 | **upcomingPages** | `now < openTime < 오늘(KST) 끝` → 15개 → `chunk(…, 5)` | `openTime` 오름차순, 같으면 `id` | 15 (5 × 3장) |
@@ -201,6 +201,7 @@ export type EndLabel = { text: string; urgent: boolean };
 | 그 이후 | `M월 D일 HH:MM 마감` | false |
 
 - 정확히 60분 남으면 urgent가 아니다.
+- 시각 값이 잘못되면(Invalid Date) `마감 시간 미정`, urgent false. `formatKstTime`은 `--:--` (module-1 `/jest-test`에서 찾아 추가).
 - `/best`는 끝난 딜도 보여주므로 카드에 `마감`이 표시된다 (plan 2.4).
 - `formatKstTime(iso)` → `HH:MM` (곧 오픈 시각 표시에도 사용).
 - KST 날짜 계산은 `lib/deals.ts`의 `kstDayStart`를 export해서 같이 쓴다 (11-17에 고친 시간대 버그를 다시 만들지 않기 위해 한 곳만 둔다).
@@ -258,7 +259,7 @@ useAutoplay(playing, intervalMs, () => api?.scrollNext(), index)
 | 장 표시 자릿수 | `padIndex`면 `01 / 05`(배너), 아니면 `1 / 3`(곧 오픈·베스트) | plan FR-01과 FR-03·04의 표기가 다름 |
 | `onTick` 보관 | `useAutoplay` 안에서 `useEffectEvent`로 감쌈 | 렌더마다 새 콜백이 와도 타이머를 다시 만들지 않음 (React 19.2) |
 | 현재 장 읽기 | `aria-live`: 재생 중 `off`, 멈춤이거나 자동 넘김 없음이면 `polite` | 5초마다 스크린리더가 읽어 대지 않게 (WAI 캐러셀 패턴) |
-| 영역 이름 | `<div aria-roledescription="carousel" aria-label={label}>` (배너 `기획전`, 곧 오픈 `곧 오픈 딜`, 베스트 `베스트 순위`) | 슬라이드는 shadcn `CarouselItem`이 이미 `role="group" aria-roledescription="slide"` |
+| 영역 이름 | shadcn `Carousel`이 `role="region" aria-roledescription="carousel"`을 붙이고, 우리는 `aria-label={label}`만 넘긴다 (배너 `기획전`, 곧 오픈 `곧 오픈 딜`, 베스트 `베스트 순위`) | 슬라이드는 shadcn `CarouselItem`이 이미 `role="group" aria-roledescription="slide"` |
 | 일시정지 버튼 이름 | 재생 중 `자동 넘김 멈추기`, 멈춤 `자동 넘김 시작` | 상태에 맞는 이름 (plan NFR) |
 | 화살표 이름 | `이전 {itemName}`, `다음 {itemName}` (배너 `기획전`, 곧 오픈·베스트 `목록`) | shadcn 기본값이 영어 sr-only라 덮어씀 |
 | children 처리 | `Children.toArray(children)`를 `CarouselItem`으로 감쌈 | children은 서버에서 그려진 결과라 그대로 놓기만 한다 |
@@ -354,7 +355,7 @@ Jest는 do 다음 `/jest-test`로 작성·실행하고 보고서는 `docs/03-ana
 | 8 | `DealCard` | 마감 5시간 전 | `오늘 HH:MM 마감`, 카운트다운 없음 |
 | 9 | `DealCard` | 마감 지남 | `마감` |
 
-- embla는 jsdom에서 `matchMedia`, `IntersectionObserver`, `ResizeObserver`가 필요하다. `test-utils/browserMocks.ts`에 모아 `PagedCarousel` 테스트에서 불러온다.
+- embla는 jsdom에서 크기를 잴 수 없어 실제로 넘어가지 않는다. `PagedCarousel` 테스트는 `embla-carousel-react`를 가짜 api(`scrollNext` mock, `select` 이벤트)로 바꿔 우리 코드의 연결만 확인한다. 그래서 `IntersectionObserver`·`ResizeObserver` mock은 필요 없고, `test-utils/browserMocks.ts`에는 컴포넌트가 직접 읽는 `matchMedia`만 둔다.
 
 ### 8.5 Seed Data
 기존 목 데이터 + `test-utils/factories.ts`에 `makeBanner()` 추가 (시각·순서를 지정한 가짜 배너).
@@ -451,5 +452,6 @@ module마다 새 세션에서 진행한다 (`/clear` 후 `/pdca do home --scope 
 |---------|------|---------|--------|
 | 0.1 | 2026-11-22 | 첫 작성. C안(실용) 선택, 요청마다 렌더링, 직접 만든 `useAutoplay`, 영역 선택·마감 문구 규칙 확정 | Park sian |
 | 0.2 | 2026-11-22 | 배너를 "마감 빠른 딜 3개"에서 "카테고리 기획전(`Banner` 별도 데이터, 최대 5장, `/best?category=` 연결)"으로 변경. 이름을 hero → Banner로 통일. 오늘 마감은 진행 중 딜 전체에서 고르고, 빈 상태 안내는 오늘 마감 자리로 이동 | Park sian |
-| 0.4 | 2026-11-23 | module-3 구현 반영: `PagedCarousel`에 `padIndex` 추가, 동작 줄이기를 `useSyncExternalStore`로 읽음, `useAutoplay`의 `useEffectEvent` | Park sian |
 | 0.3 | 2026-11-22 | 곧 오픈·베스트를 "최대 15개를 5개씩 넘기는 캐러셀"로 변경(11번가 베스트 참고). 배너·곧 오픈·베스트가 함께 쓰는 `PagedCarousel`(autoplay 켜고 끄기)로 통합, `UpcomingList`/`BestRanking` → `UpcomingPage`/`BestPage`, `chunk` 추가. 캐러셀 넘김은 서버 요청 없음을 2.2에 명시 | Park sian |
+| 0.4 | 2026-11-23 | module-3 구현 반영: `PagedCarousel`에 `padIndex` 추가, 동작 줄이기를 `useSyncExternalStore`로 읽음, `useAutoplay`의 `useEffectEvent` | Park sian |
+| 0.5 | 2026-11-23 | 분석·보고 반영: 잘못된 시각 규칙(§3.3·3.4), 의존 관계(§2.4), 영역 이름은 shadcn이 붙임(§5.3), 테스트에서 embla를 가짜로 바꿈(§8.4), 이력 순서 정리 | Park sian |
