@@ -1,4 +1,10 @@
-import { getAllDeals, getDealById, getDealsByTab } from "@/lib/deals";
+import {
+  getAllDeals,
+  getBestDeals,
+  getDealById,
+  getDealsByTab,
+  kstDayStart,
+} from "@/lib/deals";
 
 // 모듈이 불러와지는 시점의 시간이 중요한 테스트용. 캐시를 비우고 새로 불러온다.
 const loadDealsAt = async (time: string) => {
@@ -190,5 +196,61 @@ describe("getDealById", () => {
       expect(detail?.salePrice).toBe(deal.salePrice);
       expect(detail?.endTime).toBe(deal.endTime);
     }
+  });
+});
+
+describe("kstDayStart", () => {
+  it("UTC 15:30이면 한국 다음 날 0시를 돌려준다", () => {
+    expect(kstDayStart(new Date("2026-11-23T15:30:00Z"))).toBe(
+      new Date("2026-11-24T00:00:00+09:00").getTime(),
+    );
+  });
+});
+
+describe("getAllDeals에 now를 넘길 때", () => {
+  it("now를 넘기면 그 한국 날짜의 딜을 돌려준다", () => {
+    const dayStart = new Date("2026-11-10T00:00:00+09:00").getTime();
+    const deals = getAllDeals(undefined, new Date("2026-11-10T12:00:00+09:00"));
+
+    for (const deal of deals) {
+      const open = new Date(deal.openTime).getTime();
+      expect(open).toBeGreaterThanOrEqual(dayStart);
+      expect(open).toBeLessThan(dayStart + 24 * 60 * 60 * 1000);
+    }
+  });
+
+  it("getBestDeals를 불러도 getAllDeals는 id 순서를 유지한다 (/api/deals 응답 순서)", () => {
+    getBestDeals();
+
+    expect(getAllDeals().map((deal) => deal.id)).toEqual(
+      Array.from({ length: 12 }, (_, i) => i + 1),
+    );
+  });
+});
+
+describe("getBestDeals", () => {
+  it("리뷰 수가 많은 순이고, 같으면 id 순이다", () => {
+    const deals = getBestDeals();
+
+    for (let i = 1; i < deals.length; i++) {
+      const [prev, curr] = [deals[i - 1], deals[i]];
+      expect(prev.reviewCount).toBeGreaterThanOrEqual(curr.reviewCount);
+      if (prev.reviewCount === curr.reviewCount) {
+        expect(prev.id).toBeLessThan(curr.id);
+      }
+    }
+  });
+
+  it("모든 딜이 끝난 시각(23:59:30)에도 끝난 딜을 포함해 12개를 돌려준다", () => {
+    expect(
+      getBestDeals(undefined, new Date("2026-11-23T23:59:30+09:00")),
+    ).toHaveLength(12);
+  });
+
+  it("카테고리를 넘기면 그 카테고리만 돌려준다", () => {
+    const deals = getBestDeals("food");
+
+    expect(deals.length).toBe(getAllDeals("food").length);
+    expect(deals.every((deal) => deal.category === "food")).toBe(true);
   });
 });
