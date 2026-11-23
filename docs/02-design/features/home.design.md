@@ -224,7 +224,7 @@ plan 2.2 화면 초안을 따른다. 오늘 마감과 곧 오픈 카드 모양�
 | Component | Location | 서버/클라 | Props | Responsibility |
 |-----------|----------|:-:|-------|----------------|
 | `Home` | `app/page.tsx` | 서버 | - | `now` 결정, 영역 조립 |
-| `PagedCarousel` | `components/features/home/components/` | **클라** | `children`, `label`, `itemName`, `autoplay = false`, `intervalMs = 5000` | 넘김, 장 표시(`01 / 05`), 위치 막대. `autoplay`면 자동 재생·일시정지 추가. 배너·곧 오픈·베스트 공용 |
+| `PagedCarousel` | `components/features/home/components/` | **클라** | `children`, `label`, `itemName`, `autoplay = false`, `intervalMs = 5000`, `padIndex = false` | 넘김, 장 표시(`01 / 05`), 위치 막대. `autoplay`면 자동 재생·일시정지 추가. 배너·곧 오픈·베스트 공용 |
 | `useAutoplay` | 같은 폴더 | 클라 훅 | `(enabled, intervalMs, onTick, resetKey)` | `setInterval` 관리. `resetKey`가 바뀌면 타이머 다시 시작 |
 | `BannerSlide` | 같은 폴더 | 서버 | `banner`, `priority` | 기획전 이미지 + 카테고리 이름 + 제목 + 부제목, 전체가 `/best?category=` 링크. 첫 장만 `priority` |
 | `SectionHeader` | 같은 폴더 | 서버 | `title`, `sub`, `href` | `h2` + "전체보기" 링크 (`aria-label="{title} 전체보기"`) |
@@ -253,8 +253,10 @@ useAutoplay(playing, intervalMs, () => api?.scrollNext(), index)
 | 무한 반복 | `opts={{ loop: true }}` | 마지막 장 다음 첫 장 (plan 2.2) |
 | 손으로 넘기면 | `index`가 바뀌어 타이머가 처음부터 다시 | 넘기자마자 또 넘어가지 않게 |
 | 자동 넘김 없음 (`autoplay = false`) | 일시정지 버튼을 그리지 않고 `useAutoplay`도 꺼짐 | 곧 오픈·베스트는 사용자가 직접 넘긴다 |
-| 동작 줄이기 | 마운트 후 `matchMedia('(prefers-reduced-motion: reduce)')`가 참이면 `paused = true` | 렌더 중에 읽으면 서버 HTML과 달라져 hydration 불일치. 사용자가 재생을 누르면 존중 |
+| 동작 줄이기 | `useSyncExternalStore`로 `matchMedia('(prefers-reduced-motion: reduce)')`를 읽음 (서버 값은 `false`). `paused = 사용자 선택 ?? 동작 줄이기` | 렌더 중에 바로 읽으면 서버 HTML과 달라져 hydration 불일치. `useSyncExternalStore`는 hydration 동안 서버 값을 쓰고 그 뒤 실제 값으로 다시 그려서, effect 안 setState 없이 "마운트 후 읽기"와 같은 결과. 사용자가 재생을 누르면 그 선택을 존중 |
 | 장이 1개 | Carousel 없이 children만 그림 | 화살표·`01 / 01`·일시정지가 의미 없음 |
+| 장 표시 자릿수 | `padIndex`면 `01 / 05`(배너), 아니면 `1 / 3`(곧 오픈·베스트) | plan FR-01과 FR-03·04의 표기가 다름 |
+| `onTick` 보관 | `useAutoplay` 안에서 `useEffectEvent`로 감쌈 | 렌더마다 새 콜백이 와도 타이머를 다시 만들지 않음 (React 19.2) |
 | 현재 장 읽기 | `aria-live`: 재생 중 `off`, 멈춤이거나 자동 넘김 없음이면 `polite` | 5초마다 스크린리더가 읽어 대지 않게 (WAI 캐러셀 패턴) |
 | 영역 이름 | `<div aria-roledescription="carousel" aria-label={label}>` (배너 `기획전`, 곧 오픈 `곧 오픈 딜`, 베스트 `베스트 순위`) | 슬라이드는 shadcn `CarouselItem`이 이미 `role="group" aria-roledescription="slide"` |
 | 일시정지 버튼 이름 | 재생 중 `자동 넘김 멈추기`, 멈춤 `자동 넘김 시작` | 상태에 맞는 이름 (plan NFR) |
@@ -420,9 +422,9 @@ app/home-mockup/                                      삭제 (커밋 안 된 목
 4. [x] `getBestDeals` + `DealCardGrid` 정렬 (FR-10)
 5. [x] `DealCard` 마감 문구·흑백 제거·덮개 제거, `/today`·`/best`에 `now` 전달 (FR-06, FR-09 일부)
 6. [x] 상품과 안 맞는 썸네일 교체 (FR-09), 배너 이미지 고르기
-7. [ ] 서버 섹션 컴포넌트 (`SectionHeader`, `EmptyNotice`, `BannerSlide`, `UpcomingPage`, `BestPage`)
-8. [ ] `useAutoplay`, `PagedCarousel` (FR-01, FR-03, FR-04, FR-11)
-9. [ ] `app/page.tsx` 조립, `force-dynamic` (FR-01~05, 07, 08)
+7. [x] 서버 섹션 컴포넌트 (`SectionHeader`, `EmptyNotice`, `BannerSlide`, `UpcomingPage`, `BestPage`)
+8. [x] `useAutoplay`, `PagedCarousel` (FR-01, FR-03, FR-04, FR-11)
+9. [x] `app/page.tsx` 조립, `force-dynamic` (FR-01~05, 07, 08)
 10. [ ] `app/home-mockup/` 삭제, `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm test`, `pnpm build`
 11. [ ] `/jest-test` → `docs/03-analysis/home.jest.md`
 
@@ -449,4 +451,5 @@ module마다 새 세션에서 진행한다 (`/clear` 후 `/pdca do home --scope 
 |---------|------|---------|--------|
 | 0.1 | 2026-11-22 | 첫 작성. C안(실용) 선택, 요청마다 렌더링, 직접 만든 `useAutoplay`, 영역 선택·마감 문구 규칙 확정 | Park sian |
 | 0.2 | 2026-11-22 | 배너를 "마감 빠른 딜 3개"에서 "카테고리 기획전(`Banner` 별도 데이터, 최대 5장, `/best?category=` 연결)"으로 변경. 이름을 hero → Banner로 통일. 오늘 마감은 진행 중 딜 전체에서 고르고, 빈 상태 안내는 오늘 마감 자리로 이동 | Park sian |
+| 0.4 | 2026-11-23 | module-3 구현 반영: `PagedCarousel`에 `padIndex` 추가, 동작 줄이기를 `useSyncExternalStore`로 읽음, `useAutoplay`의 `useEffectEvent` | Park sian |
 | 0.3 | 2026-11-22 | 곧 오픈·베스트를 "최대 15개를 5개씩 넘기는 캐러셀"로 변경(11번가 베스트 참고). 배너·곧 오픈·베스트가 함께 쓰는 `PagedCarousel`(autoplay 켜고 끄기)로 통합, `UpcomingList`/`BestRanking` → `UpcomingPage`/`BestPage`, `chunk` 추가. 캐러셀 넘김은 서버 요청 없음을 2.2에 명시 | Park sian |
