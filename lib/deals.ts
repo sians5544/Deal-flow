@@ -46,7 +46,7 @@ const buildDeals = (now: Date): Deal[] => {
     {
       id: 2,
       thumbnail:
-        "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400",
+        "https://images.unsplash.com/photo-1606220588913-b3aacb4d2f46?w=400",
       title: "갤럭시 버즈2 프로 무선 이어폰",
       category: "tech",
       brand: "삼성",
@@ -80,7 +80,7 @@ const buildDeals = (now: Date): Deal[] => {
     {
       id: 4,
       thumbnail:
-        "https://images.unsplash.com/photo-1558317374-067fb5f30001?w=400",
+        "https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=400",
       title: "V15 디텍트 앱솔루트 무선청소기",
       category: "living",
       brand: "다이슨",
@@ -165,7 +165,7 @@ const buildDeals = (now: Date): Deal[] => {
     {
       id: 9,
       thumbnail:
-        "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400",
+        "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=400",
       title: "에어팟 프로 2세대 USB-C",
       category: "tech",
       brand: "애플",
@@ -182,7 +182,7 @@ const buildDeals = (now: Date): Deal[] => {
     {
       id: 10,
       thumbnail:
-        "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400",
+        "https://images.unsplash.com/photo-1622979135225-d2ba269cf1ac?w=400",
       title: "메타 퀘스트 3 VR 헤드셋 128GB",
       category: "tech",
       brand: "메타",
@@ -199,7 +199,7 @@ const buildDeals = (now: Date): Deal[] => {
     {
       id: 11,
       thumbnail:
-        "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=400",
+        "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400",
       title: "레이밴 웨이페어러 선글라스",
       category: "fashion",
       brand: "레이밴",
@@ -216,7 +216,7 @@ const buildDeals = (now: Date): Deal[] => {
     {
       id: 12,
       thumbnail:
-        "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=400",
+        "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400",
       title: "백설 요리유 대두유 1.8L x 4개",
       category: "food",
       brand: "CJ",
@@ -245,7 +245,6 @@ const dealDetailExtras: Record<number, DealDetailExtra> = {
       "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800",
       "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=800",
       "https://images.unsplash.com/photo-1600269452121-4f2416e55c28?w=800",
-      "https://images.unsplash.com/photo-1607522370275-f14206abe5d3?w=800",
     ],
     qnaCount: 45,
     wishCount: 8291,
@@ -268,9 +267,8 @@ const dealDetailExtras: Record<number, DealDetailExtra> = {
   },
   2: {
     images: [
-      "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=800",
+      "https://images.unsplash.com/photo-1606220588913-b3aacb4d2f46?w=800",
       "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=800",
-      "https://images.unsplash.com/photo-1608156639585-b3a032ef9689?w=800",
     ],
     qnaCount: 23,
     wishCount: 3412,
@@ -297,7 +295,7 @@ const dealDetailExtras: Record<number, DealDetailExtra> = {
     description: "어드밴스드 나이트 리페어 세럼 상품 상세 정보입니다.",
   },
   4: {
-    images: ["https://images.unsplash.com/photo-1558317374-067fb5f30001?w=800"],
+    images: ["https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=800"],
     qnaCount: 34,
     wishCount: 2789,
     breadcrumb: ["홈", "생활", "청소기", "무선청소기"],
@@ -365,7 +363,7 @@ const dealDetailExtras: Record<number, DealDetailExtra> = {
   },
   9: {
     images: [
-      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800",
+      "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=800",
     ],
     qnaCount: 102,
     wishCount: 9870,
@@ -377,7 +375,7 @@ const dealDetailExtras: Record<number, DealDetailExtra> = {
   },
   10: {
     images: [
-      "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800",
+      "https://images.unsplash.com/photo-1622979135225-d2ba269cf1ac?w=800",
     ],
     qnaCount: 40,
     wishCount: 4102,
@@ -389,7 +387,7 @@ const dealDetailExtras: Record<number, DealDetailExtra> = {
   },
   11: {
     images: [
-      "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=800",
+      "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=800",
     ],
     qnaCount: 15,
     wishCount: 1876,
@@ -404,7 +402,7 @@ const dealDetailExtras: Record<number, DealDetailExtra> = {
   },
   12: {
     images: [
-      "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=800",
+      "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=800",
     ],
     qnaCount: 8,
     wishCount: 960,
