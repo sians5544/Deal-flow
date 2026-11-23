@@ -178,3 +178,92 @@
 
 ## 면접에서 설명할 한 줄 (module-2)
 문구 규칙은 이미 순수 함수에서 경계까지 검사했으니, 카드에서는 "받은 시각으로 그 규칙을 그린다"는 연결과 전에 버그가 났던 입력(잘못된 시각, 할인율 0)만 골라 중복 없이 확인했다.
+
+---
+
+# module-3: 홈 화면 (`PagedCarousel`, `useAutoplay`)
+
+> **날짜**: 2026-11-23
+> **대상**: `components/features/home/components/useAutoplay.ts`, `components/features/home/components/PagedCarousel.tsx`
+> **설계서**: [home.design.md 5.3, 8.4 1~6-1](../02-design/features/home.design.md)
+> **함께 한 일 (module-4)**: `app/home-mockup/` 삭제 후 `tsc --noEmit`, `lint`, `test`, `build` 모두 통과 (`/`는 `ƒ` 요청마다 렌더링)
+
+## 다음 단계 판정 (module-3)
+
+**`it.failing` 없음 → analyze 진행 가능.**
+
+## 분류
+
+| 파일 | 종류 | 환경 |
+|------|------|------|
+| `useAutoplay.ts` | 커스텀 훅 (클라이언트 파일 `PagedCarousel`만 import) | jsdom, `renderHook` + `jest.useFakeTimers()` |
+| `PagedCarousel.tsx` | `"use client"` 컴포넌트 | jsdom + Testing Library + userEvent(`advanceTimers`). `embla-carousel-react`는 가짜 api로 교체, `matchMedia`는 `test-utils/browserMocks.ts` |
+
+`useAutoplay.ts`에는 `"use client"`가 없지만 훅을 쓴다. 지금은 클라이언트 파일에서만 import해서 문제가 없다. 서버 컴포넌트가 직접 import하면 깨지지만, 훅은 서버 컴포넌트에서 부를 수 없으므로 실제로 일어날 일은 아니다.
+
+## 테스트한 규칙
+
+**`__tests__/useAutoplay.test.ts`**
+- 켜져 있으면 intervalMs마다 onTick을 부른다 / 꺼져 있으면 시간이 지나도 onTick을 부르지 않는다 / 켜졌다가 꺼지면 더 이상 onTick을 부르지 않는다 / resetKey가 바뀌면 처음부터 다시 센다 / onTick이 바뀌어도 타이머를 다시 만들지 않고 마지막 onTick을 부른다 / 언마운트되면 더 이상 onTick을 부르지 않는다
+
+**`__tests__/PagedCarousel.test.tsx`**
+- 장 표시와 화살표: 장이 1개면 화살표·장 표시·일시정지 버튼 없이 내용만 그린다 / 자동 넘김이 없으면 일시정지 버튼 없이 '1 / 3'을 보여주고 5초가 지나도 넘기지 않는다 / padIndex면 장 표시를 '01 / 05'처럼 두 자리로 보여준다 / 영역 이름은 label이고 화살표 이름은 '이전·다음 {itemName}'이다 / 다음 화살표를 누르면 캐러셀을 다음 장으로 넘긴다 / 캐러셀이 다른 장을 고르면 장 표시가 그 장으로 바뀐다
+- 자동 넘김: autoplay면 5초마다 다음 장으로 넘긴다 / 손으로 넘겨 장이 바뀌면 타이머가 처음부터 다시 센다 / 일시정지를 누르면 버튼 이름이 '자동 넘김 시작'으로 바뀌고 더 넘기지 않는다 / 동작 줄이기가 켜져 있으면 처음부터 '자동 넘김 시작'이고 넘기지 않는다 / 동작 줄이기가 켜져 있어도 사용자가 시작을 누르면 넘긴다 / 마우스가 올라가 있으면 넘기지 않고, 떠나면 다시 넘긴다 / 키보드 포커스가 안에 있으면 안에서 옮겨 다녀도 넘기지 않고, 밖으로 나가면 다시 넘긴다 / 재생 중에는 장 표시를 읽지 않고(aria-live=off), 멈추면 읽는다(polite)
+
+## 분석 과정 (module-3)
+
+### 대상이 하는 일
+- `useAutoplay`: 켜져 있는 동안 정해진 간격마다 콜백을 부르고, `resetKey`가 바뀌면 처음부터 다시 센다.
+- `PagedCarousel`: 서버에서 그린 장들을 받아 넘기고, 장 번호를 보여주고, 배너일 때만 자동 넘김을 하되 사용자가 읽는 중이면 멈춘다.
+
+### 네 가지 질문
+| 질문 | 본 것 |
+|------|-------|
+| 보통 경우 | 5초마다 넘김, 화살표 누름, select 이벤트로 장 표시 갱신 |
+| 비어 있거나 끝 | 장 1개(장치 없음), 4999ms/5000ms 경계, 자동 넘김 없는 캐러셀 |
+| 이상한 입력·상황 | 렌더마다 바뀌는 onTick(타이머 재생성 여부), 언마운트 뒤 타이머, 동작 줄이기와 사용자 선택이 부딪칠 때, 캐러셀 안에서 포커스가 옮겨 갈 때(`relatedTarget`) |
+| 전에 버그가 났던 곳 | 직접 해당 없음. 시간 관련이라 `DealTimer`처럼 가짜 시간만 쓰고 실제 시간에 기대지 않게 함 (plan 위험 표) |
+
+### 우선순위 (skill 2단계)
+- 1번(시간): `useAutoplay`의 간격·재시작. `PagedCarousel`의 "언제 넘기는가"
+- 2번(여러 조건): `playing = autoplay && !paused && !hovering && !focusWithin && count > 1`. 조건마다 하나씩 끄는 테스트를 둠
+- 4번(상태): `userPaused ?? reducedMotion` (사용자 선택이 설정보다 우선)
+
+### embla를 가짜로 바꾼 이유
+jsdom은 레이아웃이 없어 embla가 실제로 넘어가지 않는다. 넘김 자체는 라이브러리의 일이라 테스트 대상이 아니다. 가짜 api(`scrollNext` mock, `select` 이벤트를 직접 발생)로 바꾸면 우리 코드의 연결("타이머 → scrollNext", "select → 장 표시와 타이머 재시작")을 확인할 수 있다. 설계 8.4는 embla용 `IntersectionObserver`·`ResizeObserver` mock도 예상했지만, embla를 가짜로 바꿔서 필요 없어졌다. `browserMocks.ts`에는 컴포넌트가 직접 쓰는 `matchMedia`만 두었다.
+
+### `it.failing`을 만들지 않은 근거
+- 포커스가 나가면 자동 넘김이 다시 시작된다. WAI 캐러셀 패턴은 "포커스가 들어오면 멈추고 사용자가 재생을 누를 때까지 다시 시작하지 않는다"를 권하지만, plan 2.2는 "그동안 자동 넘김 멈춤"으로 정했다. 지금 동작이 plan과 같아 `it`으로 고정했다.
+- 모바일에서 탭하면 `mouseenter`만 오고 `mouseleave`가 늦게 와서 자동 넘김이 한동안 멈출 수 있다. 사용자가 만진 뒤라 해가 없고 jsdom으로는 실제 터치 이벤트 순서를 재현할 수 없어 E2E·실기기 확인으로 넘긴다.
+
+### 실패를 가른 근거
+첫 실행부터 20개가 모두 통과해서 가를 실패가 없었다. 테스트가 아무것도 확인하지 않고 통과하는 일이 없도록, 멈춤 테스트는 모두 "멈춰 있다"와 "풀리면 다시 넘긴다"를 한 테스트 안에서 함께 확인한다(마우스, 포커스). 일시정지 테스트에서는 버튼을 누른 뒤 포커스를 밖으로 빼서, 멈춘 이유가 포커스가 아니라 일시정지임을 분명히 했다.
+
+### coverage
+- `useAutoplay.ts` 100%, `PagedCarousel.tsx` 분기 100%·줄 100%
+- 빠진 함수 1개: `subscribeReducedMotion`이 돌려주는 정리 함수(언마운트할 때만 불림). 동작 규칙이 아니라 추가하지 않았다.
+
+## 일부러 테스트하지 않은 것 (module-3)
+- `SectionHeader`, `EmptyNotice`, `BannerSlide`, `UpcomingPage`, `BestPage`: 동기 서버 컴포넌트지만 조건 없이 받은 값을 그리는 마크업이다. 고르는 규칙(순위 번호가 이어지는지 포함)은 `selectHomeSections`와 `startRank` 계산이 맡고, 화면은 E2E에서 본다.
+- 위치 막대 폭, 화살표 위치 같은 스타일
+- E2E로 넘길 것: `app/page.tsx` 조립, 실제 스와이프·넘김 애니메이션·무한 반복, 모바일 터치 뒤 자동 넘김, 배너를 누르면 `/best?category=`로 가는 흐름
+
+## 실행 결과 (module-3)
+- `pnpm test -- useAutoplay PagedCarousel`: 20 통과 (useAutoplay 6, PagedCarousel 14)
+- 전체 `pnpm test`: 14 suites, 126 통과
+- `pnpm exec tsc --noEmit`, `pnpm lint`: 통과
+- `pnpm build`: 성공
+
+## 계획서와 비교 (module-3)
+| 성공 조건 | 상태 |
+|-----------|------|
+| FR-01 배너 `01 / 05` 표시, 화살표 | ✅ |
+| FR-03·FR-04 `1 / 3`, 자동 넘김 없음, 5개 이하면 장치 없음 | ✅ 캐러셀 수준 (장이 1개일 때). 5개씩 묶는 규칙은 module-1 |
+| FR-11 5초 간격, 일시정지·재생, 마우스·키보드 포커스 중 멈춤, 동작 줄이기 | ✅ |
+| NFR 배너 접근성 (상태에 맞는 버튼 이름, 화살표 이름, 현재 장 읽기) | ✅ `getByRole('button', { name })`, `aria-live` |
+| 4.1 `it.failing`이 남지 않음 | ✅ 0개 |
+| 4.2 `test`·`tsc`·`lint` 통과, `build` 성공 | ✅ |
+| FR-02 오늘 마감 캐러셀, FR-07 전체보기 링크, FR-08 빈 상태 문구 | 테스트 안 함 (페이지 조립). analyze 화면 확인 + E2E |
+
+## 면접에서 설명할 한 줄 (module-3)
+넘김 자체는 라이브러리에 맡기고 가짜 api로 바꿔 "언제 넘기는가"라는 우리 규칙만 가짜 시간으로 검증했다. 자동 넘김을 막는 조건 다섯 개를 하나씩 켜고 끄면서, 멈춘 뒤 다시 넘기는지까지 같은 테스트에서 확인했다.

@@ -425,8 +425,8 @@ app/home-mockup/                                      삭제 (커밋 안 된 목
 7. [x] 서버 섹션 컴포넌트 (`SectionHeader`, `EmptyNotice`, `BannerSlide`, `UpcomingPage`, `BestPage`)
 8. [x] `useAutoplay`, `PagedCarousel` (FR-01, FR-03, FR-04, FR-11)
 9. [x] `app/page.tsx` 조립, `force-dynamic` (FR-01~05, 07, 08)
-10. [ ] `app/home-mockup/` 삭제, `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm test`, `pnpm build`
-11. [ ] `/jest-test` → `docs/03-analysis/home.jest.md`
+10. [x] `app/home-mockup/` 삭제, `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm test`, `pnpm build`
+11. [x] `/jest-test` → `docs/03-analysis/home.jest.md`
 
 ### 11.3 Session Guide
 
