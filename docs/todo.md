@@ -2,6 +2,12 @@
 
 위에서부터 하나씩 처리하고, 끝난 항목은 지웁니다 (번호는 다른 문서가 가리키므로 바꾸지 않습니다). 무엇을 왜 바꿨는지는 `improvement-notes.md`, `testing-notes.md`에 남깁니다.
 
+## 1-1. 홈 다시 읽고 이해하기 (지금)
+- [ ] 읽는 순서: `docs/04-report/home.report.md` → `improvement-notes.md` 7번 → 코드(`lib/home.ts` → `app/page.tsx` → `PagedCarousel.tsx` → `useAutoplay.ts`) → `docs/03-analysis/home.jest.md` → `testing-notes.md` 5~9번
+- [ ] 막히는 곳은 파일·줄로 질문해서 정리
+- [ ] 다 이해하면 남은 문서 커밋 푸시 + `/pdca archive home`
+- [ ] 다음 순서 정하기: 6번 E2E(홈·목록 일부)를 2번 Supabase보다 먼저 할지 (데이터를 옮기기 전후 화면이 같다는 안전망, `testing-notes.md` 7·9번)
+
 ## 2. 관리자 + AI 상품 등록 도우미
 - [ ] Supabase 연결: 목 데이터를 DB로 옮기기 (관리자에서 바꾼 내용이 배포 서버에 남도록)
 - [ ] 관리자 딜 목록 표(정렬·필터·페이지) + 등록·수정·삭제 폼(입력값 검사)
@@ -23,6 +29,11 @@
 
 ## 6. E2E (Playwright)
 - [ ] 카테고리 필터 흐름, 카드 → 상세, 없는 상품, 탭·페이지 이동
+- [ ] 홈: 08:00 / 14:00 / 23:59:30 대표 화면, 배너 → `/best?category=`, 390px 레이아웃 (`testing-notes.md` 9번 표)
+- [ ] plan에서 정할 것 (`testing-notes.md` 9번)
+  - 설계서 시나리오 표에 "Jest / E2E / 둘 다" 열 붙이기
+  - 서버 시각을 테스트에서만 바꾸는 입구: 쿼리·헤더·쿠키 중 무엇으로, 운영에서는 어떻게 끌지 (`NODE_ENV`가 아니라 별도 환경변수)
+  - 어느 브라우저까지 돌릴지 (크롬만 / webkit까지)
 
 ## 정할 것 (정책)
 - [ ] `/today`의 `revalidate = 30` 정리: `searchParams`를 읽어 이미 요청마다 그려지므로 실제 효과가 없음 (홈 설계서 2.3)
