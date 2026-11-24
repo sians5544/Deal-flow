@@ -1,16 +1,16 @@
 # 테스트 노트
 
 Jest 단위 테스트를 도입하면서 무엇을 했고, 무엇을 찾았고, 왜 그렇게 했는지 기록합니다.
-(2026-11-10 ~ 11-17)
+(2026-11-10 ~ 11-24)
 
 ## 한눈에 보기
 
 | 항목 | 내용 |
 |---|---|
 | 도구 | Jest + React Testing Library + user-event + jest-dom (`next/jest`로 SWC 변환) |
-| 테스트 수 | 8개 파일, 50개 |
+| 테스트 수 | 14개 파일, 127개 (홈 PDCA까지) |
 | 명령 | `pnpm test`, `pnpm test:watch`, `pnpm test:coverage` |
-| 찾은 버그 | 3개 (모두 고침) |
+| 찾은 버그 | 7개, 모두 고침 (11-17에 3개는 아래 3번, 홈에서 4개는 `docs/03-analysis/home.jest.md`) |
 | 자동화 | 로컬 스킬 `/jest-test`로 "무엇을 테스트할지" 판단부터 실행까지 |
 
 ## 1. 테스트 환경 구성
@@ -114,6 +114,87 @@ plan → design(설계서 11.3에 module 나누기)
 - **애매한 동작은 `it.todo`로 미루지 않는다**: "데이터가 어디서 오든 화면 함수는 스스로 방어해야 한다"는 기준으로, 사용자가 겪을 문제가 분명하면 `it.failing`으로 잡는다.
 - **analyze**: gap-detector의 설계 대비 구현 비교에 더해, `pnpm build && pnpm start`로 띄운 화면을 응답 코드·HTML 문구·브라우저(데스크톱·390px)로 확인한다. Playwright가 아직 없어서, 확인한 시각에 볼 수 없는 화면(밤에 확인하면 낮 화면)은 Jest 결과로 대신했다. E2E가 생기면 시각을 고정해서 확인한다.
 - 진행 상태 폴더 `.bkit/`는 git에 올리지 않는다.
+
+## 6. API 라우트 테스트는 어디까지 확인하나 (실제 DB와 배포)
+
+**질문**
+- API 라우트도 Jest로 테스트하는데, 목 데이터라면 무엇을 확인하는 걸까? 실제 DB까지 연결된 확인은 배포해야만 할 수 있나?
+
+**지금 하는 것** (`app/api/deals/__tests__/route.test.ts`, 6개)
+- 서버를 띄우지 않고 `route.ts`의 `GET` 함수를 직접 부른다. `new NextRequest("http://localhost/api/deals?category=food")`를 넘기고 돌아온 `Response`의 상태 코드와 JSON을 본다. 라우트는 서버에서 돌므로 `@jest-environment node`.
+- 지금은 라우트가 메모리의 목 데이터(`lib/deals.ts`)를 바로 부르므로 mock할 것이 없다.
+
+**라우트 테스트가 확인하는 것: "응답이 오는가"가 아니라 "이 요청이면 이 응답인가"**
+
+라우트는 HTTP 요청과 데이터 함수 사이의 통역사다.
+
+```
+HTTP 요청 → ① 입력 읽기 → ② 검사·분기 → ③ 데이터 함수 호출 → ④ 결과를 HTTP 응답으로
+           (쿼리, params,  (abc는 숫자    (어떤 함수를 어떤      (상태 코드, JSON 모양)
+            body)          아님 → 404)    인자로 부르나)
+```
+
+| 지금 테스트 | 확인하는 역할 |
+|---|---|
+| `category=food`면 2개 | ① 쿼리를 읽어 ③ 함수에 제대로 넘겼나 |
+| `tab`이 있으면 `{ page, items }` | ② 분기, ④ 응답 모양 |
+| `abc` → 404 | ② 잘못된 입력을 막나 |
+| 없는 id → 404, 있는 id → 200 | ④ 결과를 맞는 상태 코드로 바꾸나 |
+
+**Supabase를 붙이면: DB를 가짜로 바꿔 실패 상황을 만든다**
+
+```ts
+jest.mock("@/lib/db"); // 진짜 DB 대신 가짜
+
+it("category를 주면 그 값으로 DB를 조회한다", async () => {
+  findDeals.mockResolvedValue([]);
+  await GET(request("/api/deals?category=food"));
+  expect(findDeals).toHaveBeenCalledWith({ category: "food" }); // ③ 인자
+});
+
+it("DB가 에러를 내면 500을 돌려준다", async () => {
+  findDeals.mockRejectedValue(new Error("connection lost"));
+  const res = await GET(request("/api/deals"));
+  expect(res.status).toBe(500); // ④ 실패를 맞는 응답으로
+});
+```
+
+- 진짜 DB로는 "연결이 끊긴 상황"을 마음대로 만들 수 없다. 가짜로 바꾸면 만들 수 있다. 라우트의 에러 처리는 가짜 DB로 테스트한다.
+- 백엔드 컨트롤러 테스트에서 서비스·리포지토리를 mock하고 "이 요청이면 이 응답"을 보는 것과 같은 자리다.
+
+**가짜 DB로 확인 못 하는 것 → 배포 전에 실제 DB로 확인한다**
+
+가짜 DB로는 실제 쿼리가 맞는 데이터를 가져오는지(필터·정렬·조인), 테이블 권한(RLS) 때문에 막히는지, 환경변수·네트워크 설정이 맞는지를 알 수 없다. 하지만 **실제 DB가 필요하다는 것이 배포해야 한다는 뜻은 아니다.**
+
+| 방법 | 어떻게 | 확인할 수 있는 것 |
+|---|---|---|
+| 로컬 Supabase | `supabase start`로 내 PC(Docker)에 진짜 Postgres·Supabase를 띄움 | 쿼리 결과, 정렬·필터, RLS 권한, 마이그레이션 |
+| Vercel 미리보기 배포 | main이 아닌 브랜치를 푸시하면 별도 주소로 배포. 운영과 분리된 DB 연결 | 실제 서버 환경(Vercel 함수), 환경변수, 네트워크 연결 |
+| CI 통합 테스트 | GitHub Actions에서 로컬 Supabase를 띄우고 테스트 | 위 로컬 확인을 푸시마다 자동으로 |
+
+로컬 Supabase는 진짜 Postgres라 "쿼리가 틀렸다", "RLS에 막혔다"가 운영과 똑같이 재현된다.
+
+**운영 배포 뒤에만 보이는 것**
+- 운영 환경변수·키를 잘못 넣은 것 (미리보기는 맞는데 운영만 틀린 경우)
+- 실제 데이터 양에서만 느려지는 쿼리, 실제 트래픽·동시 접속
+- 운영 DB에만 있는 이상한 데이터
+
+이런 것은 배포 직후 확인(홈 배포 때 `/`를 두 번 요청해 `x-vercel-cache: MISS`, 문구 확인)과 에러 로그 모니터링으로 본다.
+
+**정리: 확인을 층으로 쌓는다**
+
+```
+Jest (가짜 DB)      → 라우트·함수 로직         배포 전, 몇 초
+로컬 Supabase       → 실제 쿼리·권한           배포 전, 내 PC
+미리보기 배포        → 실제 서버 환경·연결      배포 전, 별도 주소
+운영 배포 + 확인     → 운영 설정·실제 데이터     배포 후
+```
+
+뒤로 갈수록 느리고 비싸다. 문제를 가능한 앞 단계에서 잡는 것이 목표다. Supabase 단계(`docs/todo.md` 2번)를 계획할 때 로컬 Supabase와 미리보기 배포를 어디까지 쓸지 정한다.
+
+**참고**
+- 홈 PDCA에서 API 테스트를 추가하지 않은 이유: 홈은 서버 컴포넌트라 API를 HTTP로 부르지 않고 `lib/home.ts`를 직접 부른다. 테스트 대상은 라우트가 아니라 `lib/` 함수였다.
+- `route.ts`의 "tab 없으면 best 페이지용" 주석은 낡았다. `/best`는 이제 `getBestDeals`를 직접 부르고, 화면에서 실제로 쓰는 API는 상세의 `/api/deals/[id]`(SWR)뿐이다. 상세 정리(`docs/todo.md` 3번) 때 같이 정리한다.
 
 ## 면접에서 설명할 한 줄
 
